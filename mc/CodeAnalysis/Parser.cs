@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 namespace Minsk.CodeAnalysis
 {
-    class Parser
+    internal sealed   class Parser
     {
         private readonly SyntaxToken[] _tokens;
 
@@ -17,7 +17,7 @@ namespace Minsk.CodeAnalysis
             SyntaxToken token;
             do
             {
-                token = lexer.NextToken();
+                token = lexer.Lex();
 
                 if (token.Kind != SyntaxKind.WhitespaceToken &&
                     token.Kind != SyntaxKind.BadToken)
@@ -50,7 +50,7 @@ namespace Minsk.CodeAnalysis
             return current;
         }
 
-        private SyntaxToken Match(SyntaxKind kind)
+        private SyntaxToken MatchToken(SyntaxKind kind)
         {
             if (Current.Kind == kind)
                 return NextToken();
@@ -59,47 +59,86 @@ namespace Minsk.CodeAnalysis
             return new SyntaxToken(kind, Current.Position, null, null);
         }
 
-        private ExpressionSyntax ParseExpression()
-        {
-            return ParseTerm();
-        }
+       
 
         public SyntaxTree Parse()
         {
-            var expresion = ParseTerm();
-            var endOfFileToken = Match(SyntaxKind.EndOfFileToken);
+            var expresion = ParseExpression();
+            var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
             return new SyntaxTree(_diagnostics, expresion, endOfFileToken);
         }
 
-        private ExpressionSyntax ParseTerm()
-        {
-            var left = ParseFactor();
+        //  private ExpressionSyntax ParseExpression()
+        // {
+        //     return ParseTerm();
+        // }
 
-            while (Current.Kind == SyntaxKind.PlusToken ||
-                   Current.Kind == SyntaxKind.MinusToken)
+
+        // 1+2*3 =7
+        // left 1 ，operatorToken + 1，right =ParseExpression(1)
+        //right-left 2 operatorToken * 2, right = 3  binaryExpression(2,*,3)
+        // binaryExpression(1,+,bb)
+        private ExpressionSyntax ParseExpression(int parentPrecedence=0){
+            var left =  ParsePrimaryExpression();
+
+            while (true)
             {
+                var precedence = getPrecedence(Current.Kind);
+                if(precedence == 0 || precedence <= parentPrecedence)
+                  break;
+
                 var operatorToken = NextToken();
-                var right = ParseFactor();
+                var right = ParseExpression(precedence);
+
                 left = new BinaryExpressionSyntax(left, operatorToken, right);
             }
-
             return left;
         }
 
-        private ExpressionSyntax ParseFactor()
-        {
-            var left = ParsePrimaryExpression();
-
-            while (Current.Kind == SyntaxKind.StarToken ||
-                   Current.Kind == SyntaxKind.SlashToken)
-            {
-                var operatorToken = NextToken();
-                var right = ParsePrimaryExpression();
-                left = new BinaryExpressionSyntax(left, operatorToken, right);
+        public static int getPrecedence(SyntaxKind kind){
+            switch (kind)
+            {   
+                case SyntaxKind.SlashToken:
+                case SyntaxKind.StarToken:
+                    return 2;
+                case SyntaxKind.PlusToken:
+                case SyntaxKind.MinusToken:
+                    return 1;
+                
+                default:
+                    return 0;
             }
-
-            return left;
         }
+
+        // private ExpressionSyntax ParseTerm()
+        // {
+        //     var left = ParseFactor();
+
+        //     while (Current.Kind == SyntaxKind.PlusToken ||
+        //            Current.Kind == SyntaxKind.MinusToken)
+        //     {
+        //         var operatorToken = NextToken();
+        //         var right = ParseFactor();
+        //         left = new BinaryExpressionSyntax(left, operatorToken, right);
+        //     }
+
+        //     return left;
+        // }
+
+        // private ExpressionSyntax ParseFactor()
+        // {
+        //     var left = ParsePrimaryExpression();
+
+        //     while (Current.Kind == SyntaxKind.StarToken ||
+        //            Current.Kind == SyntaxKind.SlashToken)
+        //     {
+        //         var operatorToken = NextToken();
+        //         var right = ParsePrimaryExpression();
+        //         left = new BinaryExpressionSyntax(left, operatorToken, right);
+        //     }
+
+        //     return left;
+        // }
 
         private ExpressionSyntax ParsePrimaryExpression()
         {
@@ -107,12 +146,12 @@ namespace Minsk.CodeAnalysis
             {
                 var left = NextToken();
                 var expression = ParseExpression();
-                var right = Match(SyntaxKind.CloseParenthesisToken);
+                var right = MatchToken(SyntaxKind.CloseParenthesisToken);
                 return new ParenthesizedExpressionSyntax(left, expression, right);
             }
 
-            var numberToken = Match(SyntaxKind.NumberToken);
-            return new NumberExpressionSyntax(numberToken);
+            var numberToken = MatchToken(SyntaxKind.NumberToken);
+            return new LiteralExpressionSyntax(numberToken);
         }
     }
 }

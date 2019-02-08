@@ -6,7 +6,7 @@ using Minsk.CodeAnalysis;
 
 namespace Minsk
 {
-    class Program
+   internal static  class Program
     {        
         static void Main(string[] args)
         {
@@ -38,7 +38,7 @@ namespace Minsk
                     var color = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.DarkGray;                
                     PrettyPrint(syntaxTree.Root);
-                    Console.ForegroundColor = color;
+                     Console.ResetColor();
                 }
 
                 if (!syntaxTree.Diagnostics.Any())
@@ -55,7 +55,7 @@ namespace Minsk
                     foreach (var diagnostic in syntaxTree.Diagnostics)
                         Console.WriteLine(diagnostic);
 
-                    Console.ForegroundColor = color;
+                    Console.ResetColor();
                 }
             }
         }
