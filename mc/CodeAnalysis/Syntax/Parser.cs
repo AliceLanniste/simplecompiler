@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 
-namespace Minsk.CodeAnalysis
+namespace Minsk.CodeAnalysis.Syntax
 {
-    internal sealed   class Parser
+    
+
+    internal sealed  class Parser
     {
         private readonly SyntaxToken[] _tokens;
 
@@ -68,22 +70,34 @@ namespace Minsk.CodeAnalysis
             return new SyntaxTree(_diagnostics, expresion, endOfFileToken);
         }
 
-        //  private ExpressionSyntax ParseExpression()
-        // {
-        //     return ParseTerm();
-        // }
+        
+        // 1+2*3
+        //       +   
+        //    /    \  
+        //   1      *     
+        //       /   \
+        //      2     3
+        // 根据语法树来判定优先级
 
-
-        // 1+2*3 =7
-        // left 1 ，operatorToken + 1，right =ParseExpression(1)
-        //right-left 2 operatorToken * 2, right = 3  binaryExpression(2,*,3)
-        // binaryExpression(1,+,bb)
+        // -1 * 3 UnaryToken operatorToken LiteralToken
         private ExpressionSyntax ParseExpression(int parentPrecedence=0){
-            var left =  ParsePrimaryExpression();
+            ExpressionSyntax left; 
+            var unaryPrecedence = Current.Kind.getUnaryPrecedence();
+            if (unaryPrecedence != 0 && unaryPrecedence >= parentPrecedence)
+            {
+                var operatorToken = NextToken();
+                var operand = ParsePrimaryExpression();
+                left = new UnaryExpressionSyntax(operatorToken,operand);
+            }
+            else{
+
+                left = ParsePrimaryExpression();
+            }
+            
 
             while (true)
             {
-                var precedence = getPrecedence(Current.Kind);
+                var precedence = Current.Kind.getBinaryPrecedence();
                 if(precedence == 0 || precedence <= parentPrecedence)
                   break;
 
@@ -95,50 +109,7 @@ namespace Minsk.CodeAnalysis
             return left;
         }
 
-        public static int getPrecedence(SyntaxKind kind){
-            switch (kind)
-            {   
-                case SyntaxKind.SlashToken:
-                case SyntaxKind.StarToken:
-                    return 2;
-                case SyntaxKind.PlusToken:
-                case SyntaxKind.MinusToken:
-                    return 1;
-                
-                default:
-                    return 0;
-            }
-        }
 
-        // private ExpressionSyntax ParseTerm()
-        // {
-        //     var left = ParseFactor();
-
-        //     while (Current.Kind == SyntaxKind.PlusToken ||
-        //            Current.Kind == SyntaxKind.MinusToken)
-        //     {
-        //         var operatorToken = NextToken();
-        //         var right = ParseFactor();
-        //         left = new BinaryExpressionSyntax(left, operatorToken, right);
-        //     }
-
-        //     return left;
-        // }
-
-        // private ExpressionSyntax ParseFactor()
-        // {
-        //     var left = ParsePrimaryExpression();
-
-        //     while (Current.Kind == SyntaxKind.StarToken ||
-        //            Current.Kind == SyntaxKind.SlashToken)
-        //     {
-        //         var operatorToken = NextToken();
-        //         var right = ParsePrimaryExpression();
-        //         left = new BinaryExpressionSyntax(left, operatorToken, right);
-        //     }
-
-        //     return left;
-        // }
 
         private ExpressionSyntax ParsePrimaryExpression()
         {
@@ -155,3 +126,5 @@ namespace Minsk.CodeAnalysis
         }
     }
 }
+
+

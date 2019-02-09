@@ -1,4 +1,4 @@
-namespace Minsk.CodeAnalysis
+namespace Minsk.CodeAnalysis.Syntax
 {
    public enum SyntaxKind
     {   
@@ -17,6 +17,7 @@ namespace Minsk.CodeAnalysis
         //Expressions
         LiteralExpression,
         BinaryExpression,
+        UnaryExpression,
         ParenthesizedExpression
     }
 }

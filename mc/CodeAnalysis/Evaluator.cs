@@ -1,5 +1,7 @@
 ﻿using System;
 
+using Minsk.CodeAnalysis.Syntax;
+
 namespace Minsk.CodeAnalysis
 {
    public sealed class Evaluator
@@ -20,6 +22,19 @@ namespace Minsk.CodeAnalysis
         {
             if (node is LiteralExpressionSyntax n)
                 return (int) n.LiteralToken.Value;
+
+            if (node is UnaryExpressionSyntax u)
+            {
+                var operand = EvaluateExpression(u.Operand);
+                if (u.OperatorToken.Kind == SyntaxKind.MinusToken)
+                    return -operand;
+                else if(u.OperatorToken.Kind == SyntaxKind.PlusToken)
+                    return operand;                    
+                else
+                    throw new Exception($"Unexpected unary operator {u.OperatorToken.Kind}");
+            }
+
+           
 
             if (node is BinaryExpressionSyntax b)
             {
