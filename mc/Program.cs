@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Syntax;
 
@@ -33,6 +34,10 @@ namespace Minsk
                 }
 
                 var syntaxTree = SyntaxTree.Parse(line);
+                var binder = new Binder();
+                var BoundExpression = binder.BindExpression(syntaxTree.Root);
+
+                var diagnostics = syntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
 
                 if (showTree)
                 {
@@ -42,9 +47,9 @@ namespace Minsk
                      Console.ResetColor();
                 }
 
-                if (!syntaxTree.Diagnostics.Any())
+                if (!diagnostics.Any())
                 {
-                    var e = new Evaluator(syntaxTree.Root);
+                    var e = new Evaluator(BoundExpression);
                     var result = e.Evaluate();
                     Console.WriteLine(result);
                 }
