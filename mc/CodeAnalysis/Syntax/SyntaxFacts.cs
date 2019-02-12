@@ -2,7 +2,7 @@
 namespace Minsk.CodeAnalysis.Syntax
 {
 
-    internal static class SyntaxFact
+    internal static class SyntaxFacts
     {
 
         public static int getUnaryPrecedence(this SyntaxKind kind){
@@ -29,6 +29,18 @@ namespace Minsk.CodeAnalysis.Syntax
                 
                 default:
                     return 0;
+            }
+        }
+
+        public static SyntaxKind GetKeywordKind(string text){
+            switch (text)
+            {
+                case "true":
+                    return SyntaxKind.TrueKeyword;
+                case "false":
+                    return SyntaxKind.FalseKeyword;
+                default:
+                    return SyntaxKind.IdentifierToken;
             }
         }
     
