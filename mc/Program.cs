@@ -55,16 +55,17 @@ namespace Minsk
                 }
                 else
                 {
-                    var color = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.DarkRed;
+                    Console.ForegroundColor=ConsoleColor.DarkRed;
 
-                    foreach (var diagnostic in syntaxTree.Diagnostics)
+                    foreach (var diagnostic in diagnostics)
                         Console.WriteLine(diagnostic);
 
                     Console.ResetColor();
                 }
             }
         }
+
+       
            
         static void PrettyPrint(SyntaxNode node, string indent = "", bool isLast = true)
         {
@@ -91,3 +92,4 @@ namespace Minsk
         }
     }
 }
+

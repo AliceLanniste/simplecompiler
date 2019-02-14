@@ -1,3 +1,35 @@
+// namespace Minsk.CodeAnalysis.Syntax
+// {
+//     public enum SyntaxKind
+//     {
+//         // Tokens
+//         BadToken,
+//         EndOfFileToken,
+//         WhitespaceToken,
+//         NumberToken,
+//         PlusToken,
+//         MinusToken,
+//         StarToken,
+//         SlashToken,
+//         BangToken,
+//         AmpersandAmpersandToken,
+//         PipePipeToken,
+//         OpenParenthesisToken,
+//         CloseParenthesisToken,
+//         IdentifierToken,
+
+//         // Keywords
+//         FalseKeyword,
+//         TrueKeyword,
+
+//         // Expressions
+//         LiteralExpression,
+//         UnaryExpression,
+//         BinaryExpression,
+//         ParenthesizedExpression,
+//     }
+// }
+
 namespace Minsk.CodeAnalysis.Syntax
 {
     public enum SyntaxKind
@@ -11,9 +43,6 @@ namespace Minsk.CodeAnalysis.Syntax
         MinusToken,
         StarToken,
         SlashToken,
-        BangToken,
-        AmpersandAmpersandToken,
-        PipePipeToken,
         OpenParenthesisToken,
         CloseParenthesisToken,
         IdentifierToken,

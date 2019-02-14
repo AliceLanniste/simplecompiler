@@ -1,8 +1,17 @@
+// namespace Minsk.CodeAnalysis.Binding
+// {
+//     internal enum BoundUnaryOperatorKind
+//     {
+//          Identity,
+//          Negation
+//     }
+// }
+
 namespace Minsk.CodeAnalysis.Binding
 {
     internal enum BoundUnaryOperatorKind
     {
-         Identity,
-         Negation
+        Identity,
+        Negation
     }
 }
