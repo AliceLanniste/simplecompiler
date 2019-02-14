@@ -1,14 +1,3 @@
-// namespace Minsk.CodeAnalysis.Binding
-// {
-//     internal enum BoundBinaryOperatorKind
-//     {
-//         Addition,
-//         Subtraction,
-//         Multiplication,
-//         Division
-//     }
-// }
-
 namespace Minsk.CodeAnalysis.Binding
 {
     internal enum BoundBinaryOperatorKind
@@ -16,6 +5,10 @@ namespace Minsk.CodeAnalysis.Binding
         Addition,
         Subtraction,
         Multiplication,
-        Division
+        Division,
+        LogicalAnd,
+        LogicalOr,
+        Equals,
+        NotEquals
     }
 }

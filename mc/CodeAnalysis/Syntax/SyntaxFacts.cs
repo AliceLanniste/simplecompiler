@@ -1,52 +1,3 @@
-
-// namespace Minsk.CodeAnalysis.Syntax
-// {
-
-//     internal static class SyntaxFacts
-//     {
-
-//         public static int getUnaryPrecedence(this SyntaxKind kind){
-//             switch (kind)
-//             {
-//                 case SyntaxKind.PlusToken:
-//                 case SyntaxKind.MinusToken:
-//                     return 1;
-                
-//                 default:
-//                     return 0;
-//             }
-//         }
-
-//         public static int getBinaryPrecedence(this SyntaxKind kind){
-//             switch (kind)
-//             {   
-//                 case SyntaxKind.SlashToken:
-//                 case SyntaxKind.StarToken:
-//                     return 2;
-//                 case SyntaxKind.PlusToken:
-//                 case SyntaxKind.MinusToken:
-//                     return 1;
-                
-//                 default:
-//                     return 0;
-//             }
-//         }
-
-//         public static SyntaxKind GetKeywordKind(string text){
-//             switch (text)
-//             {
-//                 case "true":
-//                     return SyntaxKind.TrueKeyword;
-//                 case "false":
-//                     return SyntaxKind.FalseKeyword;
-//                 default:
-//                     return SyntaxKind.IdentifierToken;
-//             }
-//         }
-    
-//     }
-// }
-
 using System;
 
 namespace Minsk.CodeAnalysis.Syntax
@@ -59,7 +10,8 @@ namespace Minsk.CodeAnalysis.Syntax
             {
                 case SyntaxKind.PlusToken:
                 case SyntaxKind.MinusToken:
-                    return 3;
+                case SyntaxKind.BangToken:
+                    return 6;
 
                 default:
                     return 0;
@@ -70,12 +22,22 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (kind)
             {
-                case SyntaxKind.StarToken:
+               case SyntaxKind.StarToken:
                 case SyntaxKind.SlashToken:
-                    return 2;
+                    return 5;
 
                 case SyntaxKind.PlusToken:
                 case SyntaxKind.MinusToken:
+                    return 4;
+
+                case SyntaxKind.EqualsEqualsToken:
+                case SyntaxKind.BangEqualsToken:
+                    return 3;
+
+                case SyntaxKind.AmpersandAmpersandToken:
+                    return 2;
+
+                case SyntaxKind.PipePipeToken:
                     return 1;
 
                 default:
