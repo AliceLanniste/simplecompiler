@@ -4,6 +4,7 @@ using Minsk.CodeAnalysis.Syntax;
 
 namespace Minsk.CodeAnalysis
 {
+
     internal sealed class Evaluator
     {
         private readonly BoundExpression _root;
