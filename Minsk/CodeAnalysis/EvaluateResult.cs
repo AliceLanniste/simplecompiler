@@ -7,11 +7,11 @@ namespace Minsk.CodeAnalysis
     {
         public EvaluateResult(IEnumerable<string> diagnostics, object value)
         {
-            Diagnostics = diagnostics;
+            Diagnostics = diagnostics.ToArray();
             Value = value;
         }
 
-        public IEnumerable<string> Diagnostics { get; }
+        public IReadOnlyList<string> Diagnostics { get; }
         public object Value { get; }
     }
 }

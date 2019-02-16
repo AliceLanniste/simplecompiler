@@ -16,16 +16,17 @@ namespace Minsk.CodeAnalysis
 
         public EvaluateResult evaluate(){
             var binder = new Binder();
-            var boundExpression = binder.BoundExpression(SyntaxTree.root);
-            var diagnostics = SyntaxTree.diagnostics.Concar(binder.Diagnostics).ToArray();
+            var boundExpression = binder.BindExpression(SyntaxTree.Root);
+            var diagnostics = SyntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
             
             if (diagnostics.Any())
             {
                 return new EvaluateResult(diagnostics,null);
             }
 
-            var value = new Evaluator(boundExpression);
-            return new EvaluateResult();
+            var value = new Evaluator(boundExpression).Evaluate();
+            return new EvaluateResult(Array.Empty<string>(),value);
         }
     }
 }
+
