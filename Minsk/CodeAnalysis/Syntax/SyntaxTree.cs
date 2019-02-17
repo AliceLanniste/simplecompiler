@@ -23,3 +23,5 @@ namespace Minsk.CodeAnalysis.Syntax
         }
     }
 }
+
+// _diagnostics是为了在出现不符合语法的时候，编译器跳出提醒
