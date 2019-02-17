@@ -25,7 +25,7 @@ namespace Minsk.CodeAnalysis
             }
 
             var value = new Evaluator(boundExpression).Evaluate();
-            return new EvaluateResult(Array.Empty<string>(),value);
+            return new EvaluateResult(Array.Empty<Diagnostic>(),value);
         }
     }
 }
