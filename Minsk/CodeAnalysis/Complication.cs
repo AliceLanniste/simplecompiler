@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Syntax;
@@ -14,8 +15,8 @@ namespace Minsk.CodeAnalysis
 
         public SyntaxTree SyntaxTree { get; }
 
-        public EvaluateResult evaluate(){
-            var binder = new Binder();
+        public EvaluateResult evaluate(Dictionary<string,object> variables){
+            var binder = new Binder(variables);
             var boundExpression = binder.BindExpression(SyntaxTree.Root);
             var diagnostics = SyntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
             
@@ -24,7 +25,7 @@ namespace Minsk.CodeAnalysis
                 return new EvaluateResult(diagnostics,null);
             }
 
-            var value = new Evaluator(boundExpression).Evaluate();
+            var value = new Evaluator(boundExpression,variables).Evaluate();
             return new EvaluateResult(Array.Empty<Diagnostic>(),value);
         }
     }

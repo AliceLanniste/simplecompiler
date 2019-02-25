@@ -13,6 +13,7 @@ namespace Minsk.CodeAnalysis.Syntax
         SlashToken,
         BangToken,
         AmpersandAmpersandToken,
+        EqualsToken,
         EqualsEqualsToken,
         BangEqualsToken,
         PipePipeToken,
@@ -29,6 +30,8 @@ namespace Minsk.CodeAnalysis.Syntax
         UnaryExpression,
         BinaryExpression,
         ParenthesizedExpression,
+        NameExpression,
+        AssignmentExpression,
     }
 }
 
