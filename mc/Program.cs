@@ -13,7 +13,7 @@ namespace Minsk
         static void Main(string[] args)
         {
             bool showTree = false;
-            var _variables = new Dictionary<string, object>();
+            var _variables = new Dictionary<VariableSymbol, object>();
 
             while (true)
             {
@@ -35,7 +35,7 @@ namespace Minsk
                 }
 
                 var syntaxTree = SyntaxTree.Parse(line);
-                var comp = new Complication(syntaxTree);
+                var comp = new Compilation(syntaxTree);
                 var result = comp.evaluate(_variables);
 
                 if (showTree)

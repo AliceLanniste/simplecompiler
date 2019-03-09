@@ -1,8 +1,9 @@
 using System;
+using System.Collections.Generic;
 
 namespace Minsk.CodeAnalysis.Syntax
 {
-    internal static class SyntaxFacts
+    public static class SyntaxFacts
     {
         public static int GetUnaryOperatorPrecedence(this SyntaxKind kind)
         {
