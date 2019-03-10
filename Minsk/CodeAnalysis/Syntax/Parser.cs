@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace Minsk.CodeAnalysis.Syntax
@@ -129,32 +130,49 @@ namespace Minsk.CodeAnalysis.Syntax
             switch (Current.Kind)
             {
                 case SyntaxKind.OpenParenthesisToken:
-                {
-                    var left = NextToken();
-                    var expression = ParseExpression();
-                    var right = MatchToken(SyntaxKind.CloseParenthesisToken);
-                    return new ParenthesizedExpressionSyntax(left, expression, right);
-                }
-
+                    return ParseParenthesizedExpression();
+          
                 case SyntaxKind.FalseKeyword:
                 case SyntaxKind.TrueKeyword:
-                {
-                    var keywordToken = NextToken();
-                    var value = keywordToken.Kind == SyntaxKind.TrueKeyword;
-                    return new LiteralExpressionSyntax(keywordToken, value);
-                }
-                case SyntaxKind.IdentifierToken:
-                {    
-                    var variable = NextToken();
-                    return new NameExpressionSyntax(variable);
-                }
+                    return ParseBooleanLiteral();
+                
+                case SyntaxKind.NumberToken:
+                    return ParseNumberLiteral();
 
+                case SyntaxKind.IdentifierToken:
                 default:
-                {
-                    var numberToken = MatchToken(SyntaxKind.NumberToken);
-                    return new LiteralExpressionSyntax(numberToken);
-                }
+                    return ParseNameExpression(); 
             }
+
+        }
+
+       private ExpressionSyntax ParseNumberLiteral()
+        {
+            var numberToken = MatchToken(SyntaxKind.NumberToken);
+            return new LiteralExpressionSyntax(numberToken);
+        }
+
+        private ExpressionSyntax ParseParenthesizedExpression()
+        {
+            var left = MatchToken(SyntaxKind.OpenParenthesisToken);
+            var expression = ParseExpression();
+            var right = MatchToken(SyntaxKind.CloseParenthesisToken);
+            return new ParenthesizedExpressionSyntax(left, expression, right);
+        }
+
+        private ExpressionSyntax ParseBooleanLiteral()
+        {
+            // var keywordToken = NextToken();
+            // var value = keywordToken.Kind == SyntaxKind.TrueKeyword;
+            var isValue = Current.Kind == SyntaxKind.TrueKeyword;
+            var keywordToken = isValue ? MatchToken(SyntaxKind.TrueKeyword) : MatchToken(SyntaxKind.FalseKeyword);
+            return new LiteralExpressionSyntax(keywordToken, isValue);
+        }
+
+        private ExpressionSyntax ParseNameExpression()
+        {
+            var variable = MatchToken(SyntaxKind.IdentifierToken);
+            return new NameExpressionSyntax(variable);
         }
     }
 }
