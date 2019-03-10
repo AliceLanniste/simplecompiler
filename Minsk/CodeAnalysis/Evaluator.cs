@@ -38,26 +38,6 @@ namespace Minsk.CodeAnalysis
                 default:
                     throw new Exception($"Unexpected node {node.Kind}");
             }
-            if (node is BoundLiteralExpression n)
-                return NewMethod(n);
-
-            if (node is BoundVariableExpression v)
-                return NewMethod1(v);
-
-            if (node is BoundAssignmentExpression a)
-            {
-                return NewMethod2(a);
-            }
-
-            if (node is BoundUnaryExpression u)
-            {
-                return EvaluateBinaryExpression(u);
-            }
-
-            if (node is BoundBinaryExpression b)
-            {
-                return EvaluateUnaryExpression(b);
-            }
 
             
         }

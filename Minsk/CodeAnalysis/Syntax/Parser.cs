@@ -9,7 +9,7 @@ namespace Minsk.CodeAnalysis.Syntax
     {
         private readonly SyntaxToken[] _tokens;
 
-        private DiagnosticBag _diagnostics = new DiagnosticBag();
+        private readonly DiagnosticBag _diagnostics = new DiagnosticBag();
         private int _position;
 
         public Parser(string text)
