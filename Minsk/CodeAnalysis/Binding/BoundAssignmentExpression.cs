@@ -10,7 +10,7 @@ namespace Minsk.CodeAnalysis.Binding
             Expression = expression;
         }
 
-        public override BoundNodeKind Kind => BoundNodeKind.AssignmentExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundAssignmentExpression;
         public override Type Type => Expression.Type;
         public VariableSymbol Variable { get; }
         public BoundExpression Expression { get; }

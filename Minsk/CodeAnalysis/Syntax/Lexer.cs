@@ -46,7 +46,7 @@ namespace Minsk.CodeAnalysis.Syntax
 
             switch (Current)
             {
-                case "\0":
+                case '\0':
                     _kind = SyntaxKind.EndOfFileToken;
                     break;
                 case '+':
@@ -106,7 +106,7 @@ namespace Minsk.CodeAnalysis.Syntax
     
                 case '!':
                     _position++;
-                    if(Current != "=")
+                    if(Current != '=')
                     {
                         _kind = SyntaxKind.BangToken;
                     }
@@ -115,8 +115,8 @@ namespace Minsk.CodeAnalysis.Syntax
                         _kind = SyntaxKind.BangEqualsToken;
                     }
                     break;
-                case 0:case 1: case 2: case 3: case 4: case 5:
-                case 6:case 7: case 8: case 9:
+                case '0': case '1': case '2': case '3': case '4': case '5':
+                case '6': case '7': case '8': case '9':
                     ReadNumberToken();
                     break;
                 
@@ -128,7 +128,7 @@ namespace Minsk.CodeAnalysis.Syntax
                     break;
 
                 default:
-                    if (char.isLetter(Current))
+                    if (char.IsLetter(Current))
                     {
                         ReadIdentifierOrKeyword();
                     }
@@ -157,10 +157,10 @@ namespace Minsk.CodeAnalysis.Syntax
             while (char.IsDigit(Current))
                 Next();
 
-            var length = _position - start;
-            text = _text.Substring(start, length);
-            if (!int.TryParse(text, out value))
-                _diagnostics.ReportInvalidNumber(new TextSpan(start, length), _text, typeof(int));
+            var length = _position - _start;
+            var text = _text.Substring(_start, length);
+            if (!int.TryParse(text, out var value))
+                _diagnostics.ReportInvalidNumber(new TextSpan(_start, length), _text, typeof(int));
 
             _value = value;
             _kind = SyntaxKind.NumberToken;
@@ -177,12 +177,16 @@ namespace Minsk.CodeAnalysis.Syntax
         private void ReadIdentifierOrKeyword()
         {
             while (char.IsLetter(Current))
-                    Next();
+                    _position++;
 
-            var length = _position - start;
-            var text = _text.Substring(start, length);
-            var kind = SyntaxFacts.GetKeywordKind(text);
-            _kind = SyntaxFacts.GetKeywordKind(text);
+            var length = _position - _start;
+            var text = _text.Substring(_start, length);
+            _kind = SyntaxFacts.GetKeywordKind(text);        
+
+            // var length = _position - _start;
+            // var text = _text.Substring(_start, length);
+            // var kind = SyntaxFacts.GetKeywordKind(text);
+            // _kind = SyntaxFacts.GetKeywordKind(text);
         }
     }
 }

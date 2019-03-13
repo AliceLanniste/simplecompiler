@@ -8,7 +8,7 @@ namespace Minsk.CodeAnalysis
     {
         public EvaluateResult(ImmutableArray<Diagnostic> diagnostics, object value)
         {
-            Diagnostics = diagnostics.ToArray();
+            Diagnostics = diagnostics;
             Value = value;
         }
 

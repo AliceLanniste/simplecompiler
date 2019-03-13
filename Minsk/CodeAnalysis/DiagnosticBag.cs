@@ -57,6 +57,13 @@ namespace Minsk.CodeAnalysis
             Report(span, message);
         }
 
+        public void ReportBadCharacter(int position, char character)
+        {
+            var span = new TextSpan(position, 1);
+            var message = $"Bad character input: '{character}'.";
+            Report(span, message);
+        }
+
          public void ReportUndefinedName(TextSpan span, string name)
         {
             var message = $"Variable '{name}' doesn't exist.";

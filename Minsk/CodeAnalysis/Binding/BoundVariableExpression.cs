@@ -9,7 +9,7 @@ namespace Minsk.CodeAnalysis.Binding
             Variable = variable;
         }
 
-        public override BoundNodeKind Kind => BoundNodeKind.VariableExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundVariableExpression;
         public override Type Type => Variable.Type;
         public VariableSymbol Variable { get; }
     }

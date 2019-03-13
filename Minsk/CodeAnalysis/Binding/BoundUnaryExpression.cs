@@ -10,7 +10,7 @@ namespace Minsk.CodeAnalysis.Binding
             Op = op;
         }
 
-        public override BoundNodeKind Kind => BoundNodeKind.UnaryExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundUnaryExpression;
         public override Type Type => Op.OperandType;
         public BoundUnaryOperator Op { get; }
         public BoundExpression Operand { get; }
