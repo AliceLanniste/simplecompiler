@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Minsk.CodeAnalysis.Text;
 
 namespace Minsk.CodeAnalysis.Syntax
 {
@@ -13,7 +14,7 @@ namespace Minsk.CodeAnalysis.Syntax
         private readonly DiagnosticBag _diagnostics = new DiagnosticBag();
         private int _position;
 
-        public Parser(string text)
+        public Parser(SourceText text)
         {
             var tokens = new List<SyntaxToken>();
 
