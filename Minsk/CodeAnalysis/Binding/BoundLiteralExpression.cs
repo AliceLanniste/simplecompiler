@@ -9,7 +9,7 @@ namespace Minsk.CodeAnalysis.Binding
             Value = value;
         }
 
-        public override BoundNodeKind Kind => BoundNodeKind.LiteralExpression;
+        public override BoundNodeKind Kind => BoundNodeKind.BoundLiteralExpression;
         public override Type Type => Value.GetType();
         public object Value { get; }
     }

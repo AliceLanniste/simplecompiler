@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Minsk.CodeAnalysis.Syntax;
-
+using Minsk.CodeAnalysis.Text;
 
 namespace Minsk.CodeAnalysis
 {
@@ -54,6 +54,13 @@ namespace Minsk.CodeAnalysis
         public void ReportUndefinedBinaryOperator(TextSpan span, string operatorText, Type leftType, Type rightType)
         {
             var message = $"Binary operator '{operatorText}' is not defined for types {leftType} and {rightType}.";
+            Report(span, message);
+        }
+
+        public void ReportBadCharacter(int position, char character)
+        {
+            var span = new TextSpan(position, 1);
+            var message = $"Bad character input: '{character}'.";
             Report(span, message);
         }
 

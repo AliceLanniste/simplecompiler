@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Minsk.CodeAnalysis.Text;
 
 namespace Minsk.CodeAnalysis.Syntax
 {
@@ -18,11 +19,24 @@ namespace Minsk.CodeAnalysis.Syntax
 
         public static SyntaxTree Parse(string text)
         {
+            // var parser = new Parser(text);
+            // return parser.Parse();
+            var sourcetext =  SourceText.From(text);
+            return Parse(sourcetext);
+        }
+
+        public static SyntaxTree Parse(SourceText text)
+        {
             var parser = new Parser(text);
             return parser.Parse();
         }
 
         public static IEnumerable<SyntaxToken> ParseTokens(string text)
+        {
+            var sourceText = SourceText.From(text);
+            return ParseTokens(sourceText);
+        }
+        public static IEnumerable<SyntaxToken> ParseTokens(SourceText text)
         {
             var lexer = new Lexer(text);
 
