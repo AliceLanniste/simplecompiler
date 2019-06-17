@@ -35,7 +35,8 @@ namespace Minsk
                 }
 
                 var syntaxTree = SyntaxTree.Parse(line);
-                var comp = new Complication(syntaxTree);
+                var comp = new Complication(syntaxTree); 
+                // 
                 var result = comp.evaluate(_variables);
 
                 if (showTree)

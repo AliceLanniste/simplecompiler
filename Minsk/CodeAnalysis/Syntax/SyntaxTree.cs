@@ -1,26 +1,34 @@
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
+using Minsk.CodeAnalysis.Text;
+
 
 namespace Minsk.CodeAnalysis.Syntax
 {
     public sealed class SyntaxTree
     {
-        public SyntaxTree(IEnumerable<Diagnostic> diagnostics, ExpressionSyntax root, SyntaxToken endOfFileToken)
+        public SyntaxTree(string text)
         {
-            Diagnostics = diagnostics.ToArray();
+            var parse = new Parser(text);
+            var root = parse.ParseComplicationUnit();
+            var diagnostics = parse.Diagnostics.ToImmutableArray();
+
+            Text = text;
+            Diagnostics = diagnostics;
             Root = root;
-            EndOfFileToken = endOfFileToken;
+           
         }
 
-        public IReadOnlyList<Diagnostic> Diagnostics { get; }
-        public ExpressionSyntax Root { get; }
-        public SyntaxToken EndOfFileToken { get; }
+        public string Text { get; }
 
-        public static SyntaxTree Parse(string text)
-        {
-            var parser = new Parser(text);
-            return parser.Parse();
-        }
+        public ImmutableArray<Diagnostic> Diagnostics { get; }
+        public CompliactionUnitSyntax Root { get; }
+      
+        // public static SyntaxTree Parse(string text)
+        // {
+        //     var parser = new Parser(text);
+        //     return parser.Parse();
+        // }
 
         public static IEnumerable<SyntaxToken> ParseTokens(string text)
         {
@@ -37,5 +45,3 @@ namespace Minsk.CodeAnalysis.Syntax
         }
     }
 }
-
-// _diagnostics是为了在出现不符合语法的时候，编译器跳出提醒

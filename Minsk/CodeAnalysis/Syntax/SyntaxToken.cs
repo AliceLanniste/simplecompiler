@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Minsk.CodeAnalysis.Text;
 
 namespace Minsk.CodeAnalysis.Syntax
 {
@@ -20,9 +21,6 @@ namespace Minsk.CodeAnalysis.Syntax
 
         public TextSpan Span => new TextSpan(Position, Text.Length);
 
-        public override IEnumerable<SyntaxNode> GetChildren()
-        {
-            return Enumerable.Empty<SyntaxNode>();
-        }
+        
     }
 }

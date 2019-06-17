@@ -63,11 +63,11 @@ namespace Minsk.CodeAnalysis.Syntax
         }
 
        
-        public SyntaxTree Parse()
+        public CompliactionUnitSyntax ParseComplicationUnit()
         {
             var expresion = ParseExpression();
             var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-            return new SyntaxTree(_diagnostics, expresion, endOfFileToken);
+            return new  CompliactionUnitSyntax(expresion, endOfFileToken);
         }
 
         private ExpressionSyntax ParseExpression() => ParseAssignmentExpression();

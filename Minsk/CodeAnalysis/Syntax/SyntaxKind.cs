@@ -29,6 +29,7 @@ namespace Minsk.CodeAnalysis.Syntax
         LiteralExpression,
         UnaryExpression,
         BinaryExpression,
+        CompliactionUnitSyntax,
         ParenthesizedExpression,
         NameExpression,
         AssignmentExpression,

@@ -15,7 +15,7 @@ namespace Minsk.CodeAnalysis
 
         public SyntaxTree SyntaxTree { get; }
 
-        public EvaluateResult evaluate(Dictionary<string,object> variables){
+        public EvaluateResult evaluate(Dictionary<VariableSymbol,object> variables){
             var binder = new Binder(variables);
             var boundExpression = binder.BindExpression(SyntaxTree.Root);
             var diagnostics = SyntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();

@@ -1,3 +1,5 @@
+using Minsk.CodeAnalysis.Text;
+
 
 /** 
  diagnostic目的是当输入的代码与语法规则不合的时候指出错误，
