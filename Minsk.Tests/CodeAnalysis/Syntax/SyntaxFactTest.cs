@@ -12,11 +12,15 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
         [MemberData(nameof(GetSyntaxKindData))]
         public void SyntaxFact_GetText(SyntaxKind kind)
         {
-            var text = SyntaxFact.GetText(kind);
+            var text = SyntaxFacts.GetText(kind);
+            if (text == null)
+            {
+                return;
+            }
             var tokens = SyntaxTree.ParseTokens(text);
             var token =  Assert.Single(tokens);
             Assert.Equal(kind, token.Kind);
-            Assert.Enum(text, token.Text);
+            Assert.Equal(text, token.Text);
         }
 
         public static IEnumerable<object[]> GetSyntaxKindData() {

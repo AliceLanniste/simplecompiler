@@ -88,11 +88,11 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
                  using (var e = new AssertingEnumerator(expression))
                 {
                     e.AssertNode(SyntaxKind.UnaryExpression);
-                    e.AssertToken(unaryKind, unaryText);
+                    e.AssertToken(unaryKind, uText);
                     e.AssertNode(SyntaxKind.BinaryExpression);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "a");
-                    e.AssertToken(binaryKind, binaryText);
+                    e.AssertToken(binaryKind, bText);
                     e.AssertNode(SyntaxKind.NameExpression);
                     e.AssertToken(SyntaxKind.IdentifierToken, "b");
                 }   
@@ -100,7 +100,7 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
         }
 
         public static IEnumerable<object[]> GetUnaryOperatorPairsData() {
-            foreach (var a in SyntaxFacts.GetunaryOperatorKinds())
+            foreach (var a in SyntaxFacts.GetUnaryOperatorKinds())
             {
                 foreach (var b in SyntaxFacts.GetBinaryOperatorKinds())
                 {
