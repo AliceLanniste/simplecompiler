@@ -13,7 +13,7 @@ namespace Minsk
         static void Main(string[] args)
         {
             bool showTree = false;
-            var _variables = new Dictionary<string, object>();
+            var _variables = new Dictionary<VariableSymbol, object>();
 
             while (true)
             {
