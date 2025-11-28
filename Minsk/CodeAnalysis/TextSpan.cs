@@ -12,6 +12,11 @@ namespace Minsk.CodeAnalysis
         public int Length { get; }
 
         public int End => Start + Length;
+
+        internal static TextSpan FromBounds(int start, int end)
+        {
+            return new TextSpan(start, end - start);
+        }
     }
 }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Syntax;
+using System.Collections.Immutable;
 
 namespace Minsk.CodeAnalysis
 {
@@ -18,7 +19,7 @@ namespace Minsk.CodeAnalysis
         public EvaluateResult evaluate(Dictionary<VariableSymbol,object> variables){
             var binder = new Binder(variables);
             var boundExpression = binder.BindExpression(SyntaxTree.Root);
-            var diagnostics = SyntaxTree.Diagnostics.Concat(binder.Diagnostics).ToArray();
+            var diagnostics = SyntaxTree.Diagnostics.Concat(binder.Diagnostics).ToImmutableArray();
             
             if (diagnostics.Any())
             {
@@ -26,7 +27,7 @@ namespace Minsk.CodeAnalysis
             }
 
             var value = new Evaluator(boundExpression,variables).Evaluate();
-            return new EvaluateResult(Array.Empty<Diagnostic>(),value);
+            return new EvaluateResult(ImmutableArray<Diagnostic>.Empty,value);
         }
     }
 }

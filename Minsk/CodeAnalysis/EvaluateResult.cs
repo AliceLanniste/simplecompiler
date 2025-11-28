@@ -1,17 +1,18 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Minsk.CodeAnalysis
 {
     public sealed class EvaluateResult
     {
-        public EvaluateResult(IEnumerable<Diagnostic> diagnostics, object value)
+        public EvaluateResult(ImmutableArray<Diagnostic> diagnostics, object value)
         {
-            Diagnostics = diagnostics.ToArray();
+            Diagnostics = diagnostics;
             Value = value;
         }
 
-        public IReadOnlyList<Diagnostic> Diagnostics { get; }
+        public ImmutableArray<Diagnostic> Diagnostics { get; }
         public object Value { get; }
     }
 }

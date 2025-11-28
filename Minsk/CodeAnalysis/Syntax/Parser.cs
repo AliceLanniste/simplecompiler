@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
+
 
 namespace Minsk.CodeAnalysis.Syntax
 {
@@ -6,7 +8,7 @@ namespace Minsk.CodeAnalysis.Syntax
 
     internal sealed class Parser
     {
-        private readonly SyntaxToken[] _tokens;
+          private readonly ImmutableArray<SyntaxToken> _tokens;
 
         private DiagnosticBag _diagnostics = new DiagnosticBag();
         private int _position;
@@ -28,7 +30,7 @@ namespace Minsk.CodeAnalysis.Syntax
                 }
             } while (token.Kind != SyntaxKind.EndOfFileToken);
 
-            _tokens = tokens.ToArray();
+            _tokens = tokens.ToImmutableArray();
             _diagnostics.AddRange(lexer.Diagnostics);
         }
 
@@ -58,7 +60,6 @@ namespace Minsk.CodeAnalysis.Syntax
                 return NextToken();
 
             _diagnostics.ReportUnexpectToken(Current.Span,Current.Kind, kind);
-            // _diagnostics.Add($"ERROR: Unexpected token <{Current.Kind}>, expected <{kind}>");
             return new SyntaxToken(kind, Current.Position, null, null);
         }
 
@@ -67,7 +68,7 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             var expresion = ParseExpression();
             var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-            return new SyntaxTree(_diagnostics, expresion, endOfFileToken);
+            return new SyntaxTree(_diagnostics.ToImmutableArray(), expresion, endOfFileToken);
         }
 
         private ExpressionSyntax ParseExpression() => ParseAssignmentExpression();
@@ -129,33 +130,46 @@ namespace Minsk.CodeAnalysis.Syntax
             switch (Current.Kind)
             {
                 case SyntaxKind.OpenParenthesisToken:
-                {
-                    var left = NextToken();
-                    var expression = ParseExpression();
-                    var right = MatchToken(SyntaxKind.CloseParenthesisToken);
-                    return new ParenthesizedExpressionSyntax(left, expression, right);
-                }
-
+                    return ParseParenthesizedExpression();
                 case SyntaxKind.FalseKeyword:
                 case SyntaxKind.TrueKeyword:
-                {
-                    var keywordToken = NextToken();
-                    var value = keywordToken.Kind == SyntaxKind.TrueKeyword;
-                    return new LiteralExpressionSyntax(keywordToken, value);
-                }
+                    return ParseBooleanLiteral();
+                case SyntaxKind.NumberToken:
+                    return ParseNumberLiteral();
                 case SyntaxKind.IdentifierToken:
-                {    
-                    var variable = NextToken();
-                    return new NameExpressionSyntax(variable);
-                }
-
                 default:
-                {
-                    var numberToken = MatchToken(SyntaxKind.NumberToken);
-                    return new LiteralExpressionSyntax(numberToken);
-                }
+                    return ParseNameExpression();
             }
         }
+
+         private ExpressionSyntax ParseParenthesizedExpression()
+        {
+            var left  = MatchToken(SyntaxKind.OpenParenthesisToken);
+            var expression = ParseExpression();
+            var right = MatchToken(SyntaxKind.CloseParenthesisToken);
+            return new ParenthesizedExpressionSyntax(left, expression, right);
+        }
+
+        
+        private ExpressionSyntax ParseBooleanLiteral()
+        {
+            var isTrue = Current.Kind == SyntaxKind.TrueKeyword;
+            var keywordToken = MatchToken(isTrue ? SyntaxKind.TrueKeyword : SyntaxKind.FalseKeyword);
+            return new LiteralExpressionSyntax(keywordToken, isTrue);
+        }
+
+        private ExpressionSyntax ParseNameExpression()
+        {
+               var IdentifierToken = MatchToken(SyntaxKind.IdentifierToken);
+            return new NameExpressionSyntax(IdentifierToken);
+        }
+
+        private ExpressionSyntax ParseNumberLiteral()
+        {
+             var numberToken = MatchToken(SyntaxKind.NumberToken);
+            return new LiteralExpressionSyntax(numberToken);
+        }
+      
     }
 }
 
