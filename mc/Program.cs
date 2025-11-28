@@ -53,17 +53,24 @@ namespace Minsk
                 else
                 {
                     foreach (var diagnostic in result.Diagnostics)
-                    {
+                    {   
+                        var lineIndex = syntaxTree.Text.GetLineIndex(diagnostic.Span.Start);
+                        var textLine = syntaxTree.Text.Lines[lineIndex];
+                        var lineNumber = lineIndex + 1;
+                        var character = diagnostic.Span.Start - textLine.Start + 1;
                         Console.WriteLine();
 
                         Console.ForegroundColor = ConsoleColor.DarkRed;
+                        Console.Write($"({lineNumber}, {character}): ");
                         Console.WriteLine(diagnostic);
                         Console.ResetColor();
 
-                        var prefix = line.Substring(0, diagnostic.Span.Start);
-                        var error = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length);
-                        var suffix = line.Substring(diagnostic.Span.End);
+                        var prefixSpan = TextSpan.FromBounds(textLine.Start, diagnostic.Span.Start);
+                        var suffixSpan = TextSpan.FromBounds(diagnostic.Span.End, textLine.End);
 
+                        var prefix = syntaxTree.Text.ToString(prefixSpan);
+                        var error = syntaxTree.Text.ToString(diagnostic.Span);
+                        var suffix = syntaxTree.Text.ToString(suffixSpan);
                         Console.Write("    ");
                         Console.Write(prefix);
 
@@ -75,13 +82,6 @@ namespace Minsk
 
                         Console.WriteLine();
                     }
-                    Console.WriteLine();
-                    // Console.ForegroundColor=ConsoleColor.DarkRed;
-
-                    // foreach (var diagnostic in result.Diagnostics)
-                    //     Console.WriteLine(diagnostic);
-
-                    // Console.ResetColor();
                 }
             }
         }
