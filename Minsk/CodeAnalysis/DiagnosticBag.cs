@@ -32,7 +32,7 @@ namespace Minsk.CodeAnalysis
             Report(span, message);
         }
 
-        public void ReportBadToken(int position, char current)
+        public void ReportBadCharacter(int position, char current)
         {
             var span = new TextSpan(position, 1);
             var message = $"Bad character input: '{current}'";

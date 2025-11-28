@@ -9,15 +9,21 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
     public class LexerTests
     {
-        [Theory]
-        [MemberData(nameof(GetTokensData))]
-        public void Lexer_Lexes_Token(SyntaxKind kind, string text)
-        {
-            var tokens = SyntaxTree.ParseTokens(text);
+       [Fact]
+        public void Lexer_Lexes_Token()
+        {   var tokenKinds = Enum.GetValues(typeof(SyntaxKind))
+                                 .Cast<SyntaxKind>()
+                                 .Where(k => k.ToString().EndsWith("Keyword") ||
+                                             k.ToString().EndsWith("Token"));
+          
+            var testedTokenKinds = GetTokens().Concat(GetSeparators()).Select(t => t.kind);
 
-            var token = Assert.Single(tokens);
-            Assert.Equal(kind, token.Kind);
-            Assert.Equal(text, token.Text);
+            var untestedTokenKinds = new SortedSet<SyntaxKind>(tokenKinds);
+            untestedTokenKinds.Remove(SyntaxKind.BadToken);
+            untestedTokenKinds.Remove(SyntaxKind.EndOfFileToken);
+            untestedTokenKinds.ExceptWith(testedTokenKinds);
+
+            Assert.Empty(untestedTokenKinds);
         }
 
         [Theory]
@@ -26,8 +32,7 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
                                            SyntaxKind t2Kind, string t2Text)
         {
             var text = t1Text + t2Text;
-            var tokens = SyntaxTree.ParseTokens(text).ToArray();
-
+        var tokens = SyntaxTree.ParseTokens(text).ToArray();
             Assert.Equal(2, tokens.Length);
             Assert.Equal(tokens[0].Kind, t1Kind);
             Assert.Equal(tokens[0].Text, t1Text);
@@ -73,27 +78,21 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
         private static IEnumerable<(SyntaxKind kind, string text)> GetTokens()
         {
-            return new[]
+           var fixedTokens = Enum.GetValues(typeof(SyntaxKind))
+                                  .Cast<SyntaxKind>()
+                                  .Select(k => (kind: k, text: SyntaxFacts.GetText(k)))
+                                  .Where(t => t.text != null);
+
+
+            var dynamicTokens = new[]
             {
-                (SyntaxKind.PlusToken, "+"),
-                (SyntaxKind.MinusToken, "-"),
-                (SyntaxKind.StarToken, "*"),
-                (SyntaxKind.SlashToken, "/"),
-                (SyntaxKind.BangToken, "!"),
-                (SyntaxKind.EqualsToken, "="),
-                (SyntaxKind.AmpersandAmpersandToken, "&&"),
-                (SyntaxKind.PipePipeToken, "||"),
-                (SyntaxKind.EqualsEqualsToken, "=="),
-                (SyntaxKind.BangEqualsToken, "!="),
-                (SyntaxKind.OpenParenthesisToken, "("),
-                (SyntaxKind.CloseParenthesisToken, ")"),
-                (SyntaxKind.FalseKeyword, "false"),
-                (SyntaxKind.TrueKeyword, "true"),
                 (SyntaxKind.NumberToken, "1"),
                 (SyntaxKind.NumberToken, "123"),
                 (SyntaxKind.IdentifierToken, "a"),
                 (SyntaxKind.IdentifierToken, "abc"),
             };
+
+            return fixedTokens.Concat(dynamicTokens);
         }
 
         private static IEnumerable<(SyntaxKind kind, string text)> GetSeparators()

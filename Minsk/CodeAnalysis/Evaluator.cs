@@ -25,41 +25,62 @@ namespace Minsk.CodeAnalysis
 
         private object EvaluateExpression(BoundExpression node)
         {
-            if (node is BoundLiteralExpression n)
-                return n.Value;
-            if (node is BoundVariableExpression v)
+             switch (node.Kind)
             {
-                return _variables[v.Variable];
+                case BoundNodeKind.LiteralExpression:
+                    return EvaluateLiteralExpression((BoundLiteralExpression)node);
+                case BoundNodeKind.VariableExpression:
+                    return this.EvaluateVariableExpression((BoundVariableExpression)node);
+                case BoundNodeKind.AssignmentExpression:
+                    return EvaluateAssignmentExpression((BoundAssignmentExpression)node);
+                case BoundNodeKind.UnaryExpression:
+                    return EvaluateUnaryExpression((BoundUnaryExpression)node);
+                case BoundNodeKind.BinaryExpression:
+                    return EvaluateBinaryExpression((BoundBinaryExpression)node);
+                default:
+                    throw new Exception($"Unexpected node {node.Kind}");
             }
+           
+        }
 
-            if (node is BoundAssignmentExpression a)
+        private object EvaluateLiteralExpression(BoundLiteralExpression n)
+        {
+            return n.Value;
+        }
+
+        private object EvaluateVariableExpression(BoundVariableExpression v)
+        {
+            return _variables[v.Variable];
+        }
+
+        private object EvaluateAssignmentExpression(BoundAssignmentExpression a)
+        {
+            var value = EvaluateExpression(a.Expression);
+            _variables[a.Variable] = value;
+            return value;
+        }
+
+        private object EvaluateUnaryExpression(BoundUnaryExpression u)
+        {
+            var operand = EvaluateExpression(u.Operand);
+
+          switch (u.Op.Kind)
             {
-                var value = EvaluateExpression(a.Expression);
-                _variables[a.Variable] = value;
-                return value;
+                case BoundUnaryOperatorKind.Identity:
+                    return (int)operand;
+                case BoundUnaryOperatorKind.Negation:
+                    return -(int)operand;
+                case BoundUnaryOperatorKind.LogicalNegation:
+                    return !(bool)operand;
+                default:
+                    throw new Exception($"Unexpected unary operator {u.Op}");
             }
+        }
 
-            if (node is BoundUnaryExpression u)
-            {
-                var operand =  EvaluateExpression(u.Operand);
-
-                switch (u.Op.Kind)
-                {
-                    case BoundUnaryOperatorKind.Identity:
-                        return (int)operand;
-                    case BoundUnaryOperatorKind.Negation:
-                        return -(int)operand;
-                    case BoundUnaryOperatorKind.LogicalNegation:
-                        return !(bool)operand;
-                    default:
-                        throw new Exception($"Unexpected unary operator {u.Op}");
-                }
-            }
-
-            if (node is BoundBinaryExpression b)
-            {
-                var left =  EvaluateExpression(b.Left);
-                var right =  EvaluateExpression(b.Right);
+        private object EvaluateBinaryExpression(BoundBinaryExpression b)
+        {
+            var left = EvaluateExpression(b.Left);
+            var right = EvaluateExpression(b.Right);
 
                 switch (b.Op.Kind)
                 {
@@ -82,9 +103,6 @@ namespace Minsk.CodeAnalysis
                     default:
                         throw new Exception($"Unexpected binary operator {b.Op}");
                 }
-            }
-
-            throw new Exception($"Unexpected node {node.Kind}");
         }
     }
 }
