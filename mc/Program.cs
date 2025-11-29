@@ -19,10 +19,12 @@ namespace Minsk
 
             while (true)
             {
+                 Console.ForegroundColor = ConsoleColor.Green;
                 if (textBuilder.Length == 0)
-                    Console.Write("> ");
+                    Console.Write("» ");
                 else
-                    Console.Write("| ");
+                    Console.Write("· ");
+                Console.ResetColor();
 
                 var input = Console.ReadLine();
                 var isBlank = string.IsNullOrWhiteSpace(input);
@@ -47,7 +49,7 @@ namespace Minsk
                 }
 
                 textBuilder.AppendLine(input);
-                var text = textBuilder.ToString().TrimEnd();
+                var text = textBuilder.ToString();
 
                 var syntaxTree = SyntaxTree.Parse(text);
 
@@ -66,7 +68,9 @@ namespace Minsk
 
                 if (!result.Diagnostics.Any())
                 {
+                     Console.ForegroundColor = ConsoleColor.Magenta;
                     Console.WriteLine(result.Value);
+                    Console.ResetColor();
                 }
                 else
                 {
@@ -76,7 +80,6 @@ namespace Minsk
                         var line = syntaxTree.Text.Lines[lineIndex];
                         var lineNumber = lineIndex + 1;
                         var character = diagnostic.Span.Start - line.Start + 1;
-                        Console.WriteLine($"{lineNumber}:{character} {diagnostic.Message}");
                         Console.WriteLine();
 
                         Console.ForegroundColor = ConsoleColor.DarkRed;
