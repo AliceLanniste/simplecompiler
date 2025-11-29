@@ -33,9 +33,9 @@ namespace Minsk.Tests.CodeAnalysis
            public void SyntaxFact_GetText_RoundTrips(string text, object expectedValue)
         {
                 var syntaxTree = SyntaxTree.Parse(text);
-                var comp = new Complication(syntaxTree);
+                var comp = new Compilation(syntaxTree);
                 var variables = new Dictionary<VariableSymbol, object>();
-                var result = comp.evaluate(variables);
+                var result = comp.Evaluate(variables);
                 
                 Assert.Empty(result.Diagnostics);
                 Assert.Equal(expectedValue, result.Value);
