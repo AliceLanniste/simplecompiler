@@ -4,9 +4,9 @@ using System.Linq;
 
 namespace Minsk.CodeAnalysis
 {
-    public sealed class EvaluateResult
+    public sealed class EvaluationResult
     {
-        public EvaluateResult(ImmutableArray<Diagnostic> diagnostics, object value)
+        public EvaluationResult(ImmutableArray<Diagnostic> diagnostics, object value)
         {
             Diagnostics = diagnostics;
             Value = value;
@@ -16,3 +16,4 @@ namespace Minsk.CodeAnalysis
         public object Value { get; }
     }
 }
+

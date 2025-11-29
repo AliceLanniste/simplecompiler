@@ -51,8 +51,7 @@ namespace Minsk.CodeAnalysis.Text
             {
                 var index = lower + (upper-lower) / 2;
                 var line = Lines[index];
-
-                if (line.Start <= position && position <= line.End)
+              if (line.Start <= position && position <= line.End)
                     return index;
 
                 if (position < line.Start)
@@ -63,10 +62,23 @@ namespace Minsk.CodeAnalysis.Text
                 {
                     lower = index + 1;
                 }
+                // if (line.Start == position)
+                //     return index;
+
+                // if (position < line.Start)
+                // {
+                //     upper = index - 1;
+                // }     
+                // else
+                // {
+                //     lower = index + 1;
+                // }
             }
 
             return lower - 1;
         }
+
+        public string StrText =>_text;
 
         private void AddLine(ImmutableArray<TextLine>.Builder result,SourceText sourceText, int position, int lineStart, int lineBreakWidth)
         {
@@ -109,4 +121,5 @@ namespace Minsk.CodeAnalysis.Text
   
  
 }
+
 

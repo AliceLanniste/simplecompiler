@@ -22,12 +22,14 @@ namespace Minsk.CodeAnalysis.Syntax
          public static SyntaxTree Parse(SourceText text)
         {
             var parser = new Parser(text);
+            
             return parser.Parse();
         }
 
         public static SyntaxTree Parse(string text)
         {
             var sourceText = SourceText.From(text);
+          
             return Parse(sourceText);
         }
         public static IEnumerable<SyntaxToken> ParseTokens( string text)

@@ -141,11 +141,12 @@ namespace Minsk.CodeAnalysis.Syntax
                     }
                     break;
             }
-           
+             
             var length = _position - _start;
            var text = SyntaxFacts.GetText(_kind);
             if (text == null)
                 text = _text.ToString(_start, length);
+         
 
             return new SyntaxToken(_kind, _start, text, _value);
         }

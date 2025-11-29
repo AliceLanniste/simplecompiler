@@ -11,6 +11,8 @@ namespace Minsk.CodeAnalysis.Text
         }
 
         public SourceText Text { get; }
+
+    
         public int Start { get; }
         public int Length { get; }
         public int End => Start + Length;
@@ -20,3 +22,4 @@ namespace Minsk.CodeAnalysis.Text
         public override string ToString() => Text.ToString(Span);
     }
 }
+

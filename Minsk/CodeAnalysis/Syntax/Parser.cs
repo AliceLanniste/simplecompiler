@@ -59,7 +59,7 @@ namespace Minsk.CodeAnalysis.Syntax
             if (Current.Kind == kind)
                 return NextToken();
 
-            _diagnostics.ReportUnexpectToken(Current.Span,Current.Kind, kind);
+            _diagnostics.ReportUnexpectedToken(Current.Span,Current.Kind, kind);
             return new SyntaxToken(kind, Current.Position, null, null);
         }
 

@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Minsk.CodeAnalysis.Syntax;
-
+using Minsk.CodeAnalysis.Text;  
 
 namespace Minsk.CodeAnalysis
 {
@@ -39,7 +39,7 @@ namespace Minsk.CodeAnalysis
             Report(span, message);
         }
 
-        public void ReportUnexpectToken(TextSpan span,  SyntaxKind actualKind, SyntaxKind expectedKind)
+        public void ReportUnexpectedToken(TextSpan span,  SyntaxKind actualKind, SyntaxKind expectedKind)
         {
             var message = $"Unexpected token <{actualKind}>, expected <{expectedKind}>";
             Report(span, message);
