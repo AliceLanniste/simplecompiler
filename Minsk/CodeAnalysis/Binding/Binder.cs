@@ -65,7 +65,7 @@ namespace Minsk.CodeAnalysis.Binding
                 case SyntaxKind.ExpressionStatement:
                     return BindExpressionStatement((ExpressionStatementSyntax)syntax);
                 case SyntaxKind.BlockStatement:
-                    return BindBlockStatement((BlockStatemetnSyntax)syntax);
+                    return BindBlockStatement((BlockStatementSyntax)syntax);
                 default:
                     throw new Exception($"Unexpected syntax {syntax.Kind}");
             }
@@ -98,7 +98,7 @@ namespace Minsk.CodeAnalysis.Binding
         }
 
 
-        private BoundStatement BindBlockStatement(BlockStatemetnSyntax syntax)
+        private BoundStatement BindBlockStatement(BlockStatementSyntax syntax)
         {
             var boundStatements = new List<BoundStatement>();
             foreach (var statement in syntax.Statements)

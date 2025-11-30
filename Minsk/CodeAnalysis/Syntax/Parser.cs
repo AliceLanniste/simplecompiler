@@ -92,8 +92,8 @@ namespace Minsk.CodeAnalysis.Syntax
                 statements.Add(statement);
             }
             var closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken);
-            return new BlockStatemetnSyntax(openBraceToken, statements.ToImmutable(), closeBraceToken);
-        }
+            return new BlockStatementSyntax(openBraceToken, statements.ToImmutable(), closeBraceToken);
+    }
 
         private ExpressionStatementSyntax ParseExpressionStatement()
         {

@@ -1,4 +1,4 @@
 namespace Minsk.CodeAnalysis.Syntax
 {
-  public sealed class StatementSyntax : SyntaxNode {}
+  public abstract class StatementSyntax : SyntaxNode {}
 }

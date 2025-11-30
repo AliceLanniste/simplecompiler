@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace Minsk.CodeAnalysis.Binding
 {
-    internal sealed class BoundBlockStatement
+    internal sealed class BoundBlockStatement: BoundStatement
     {
         public BoundBlockStatement(ImmutableArray<BoundStatement> statements)
         {

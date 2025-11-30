@@ -6,10 +6,10 @@ namespace Minsk.CodeAnalysis
 {
     internal sealed class Evaluator
     {
-        private readonly BoundExpression _root;
+        private readonly BoundStatement _root;
         private readonly Dictionary<VariableSymbol, object> _variables;
 
-        public Evaluator(BoundExpression root, Dictionary<VariableSymbol, object> variables)
+        public Evaluator(BoundStatement root, Dictionary<VariableSymbol, object> variables)
         {
             _root = root;
             _variables = variables;
@@ -17,7 +17,37 @@ namespace Minsk.CodeAnalysis
 
         public object Evaluate()
         {
-            return EvaluateExpression(_root);
+            return EvaluateStatement(_root);
+        }
+
+        private object EvaluateStatement(BoundStatement node)
+        {
+            switch (node.Kind)
+            {
+                case BoundNodeKind.ExpressionStatement:
+                    return EvaluateExpressionStatement((BoundExpressionStatement)node);
+                case BoundNodeKind.BlockStatement:
+                    return EvaluateBlockStatement((BoundBlockStatement)node);
+                default:
+                    throw new Exception($"Unexpected node {node.Kind}");
+            }
+        }
+
+        private object EvaluateBlockStatement(BoundBlockStatement node)
+        {
+            object value = null;
+
+            foreach (var statement in node.Statements)
+            {
+                value = EvaluateStatement(statement);
+            }
+
+            return value;
+        }
+
+        private object EvaluateExpressionStatement(BoundExpressionStatement node)
+        {
+            return EvaluateExpression(node.Expression);
         }
 
         private object EvaluateExpression(BoundExpression node)
@@ -46,7 +76,7 @@ namespace Minsk.CodeAnalysis
 
         private object EvaluateVariableExpression(BoundVariableExpression v)
         {
-            return _variables[v.Variable];
+            return _variables[v.Variable];  
         }
 
         private object EvaluateAssignmentExpression(BoundAssignmentExpression a)
