@@ -21,17 +21,21 @@ namespace Minsk.CodeAnalysis.Binding
         {
             var parent = CreateParentScope(previous);
             var binder = new Binder(parent);
-            var expression = binder.BindExpression(syntax.Expression);
+            var statement = binder.BindStatement(syntax.Statement);
             var variables =binder._scope.GetDeclaredVariables();
             var diagnostics = binder.Diagnostics.ToImmutableArray();
             if (previous != null)
             {
                 diagnostics = diagnostics.InsertRange(0,previous.Diagnostics);
             }
-            return new BoundGlobalScope(previous, diagnostics, variables, expression);
+            return new BoundGlobalScope(previous, diagnostics, variables, statement);
         }
 
         public DiagnosticBag Diagnostics => _diagnostics;
+        //^当在Program的时候，previous为null那么创建一个BoundScope
+        //^parent = new BoundScope(null) previous.globalScope = new BoundGlobalScope(null,scope.variabls,)
+        //^ previous = compilation
+        //^ 此时stack = 1,previous 抛出啦 ，然后重新创建一个BoundScope(parent=null)，然后这新scope  
 
        private static BoundScope CreateParentScope(BoundGlobalScope previous)
         {
@@ -53,6 +57,19 @@ namespace Minsk.CodeAnalysis.Binding
             }
             return parent;
         }
+
+        public BoundStatement BindStatement(StatementSyntax syntax)
+        {
+            switch (syntax.Kind)
+            {
+                case SyntaxKind.ExpressionStatement:
+                    return BindExpressionStatement((ExpressionStatementSyntax)syntax);
+                case SyntaxKind.BlockStatement:
+                    return BindBlockStatement((BlockStatemetnSyntax)syntax);
+                default:
+                    throw new Exception($"Unexpected syntax {syntax.Kind}");
+            }
+        }
         public BoundExpression BindExpression(ExpressionSyntax syntax)
         {
             switch (syntax.Kind)
@@ -73,6 +90,26 @@ namespace Minsk.CodeAnalysis.Binding
                     throw new Exception($"Unexpected syntax {syntax.Kind}");
             }
         }
+
+        private BoundStatement BindExpressionStatement(ExpressionStatementSyntax syntax)
+        {  
+            var boundExpression = BindExpression(syntax.Expression);
+            return new BoundExpressionStatement(boundExpression);
+        }
+
+
+        private BoundStatement BindBlockStatement(BlockStatemetnSyntax syntax)
+        {
+            var boundStatements = new List<BoundStatement>();
+            foreach (var statement in syntax.Statements)
+            {
+                var boundStatement = BindStatement(statement);
+                boundStatements.Add(boundStatement);
+            }
+
+            return new BoundBlockStatement(boundStatements.ToImmutableArray());
+        }
+
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpressionSyntax syntax)
         {

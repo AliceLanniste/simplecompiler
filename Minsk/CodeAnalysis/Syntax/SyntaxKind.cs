@@ -20,7 +20,8 @@ namespace Minsk.CodeAnalysis.Syntax
         OpenParenthesisToken,
         CloseParenthesisToken,
         IdentifierToken,
-
+        OpenBraceToken,
+        CloseBraceToken,
         // Keywords
         FalseKeyword,
         TrueKeyword,
@@ -34,7 +35,10 @@ namespace Minsk.CodeAnalysis.Syntax
         AssignmentExpression,
 
         //unit
-        CompilationUnit
+        CompilationUnit,
+        // Statements
+        ExpressionStatement,
+        BlockStatement,
     }
 }
 

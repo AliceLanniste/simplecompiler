@@ -65,11 +65,41 @@ namespace Minsk.CodeAnalysis.Syntax
 
         public CompilationUnitSyntax ParseCompilationUnit()
         {
-            var expression = ParseExpression();
+            var statement = ParseStatement();
             var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-            return new CompilationUnitSyntax(expression, endOfFileToken);
+            return new CompilationUnitSyntax(statement, endOfFileToken);
         }
     
+        private StatementSyntax ParseStatement()
+        {
+            switch (Current.Kind)
+            {
+                case SyntaxKind.OpenBraceToken:
+                    return ParseBlockStatement();
+                
+                default:
+                    return ParseExpressionStatement();
+            }
+        }
+
+        private BlockStatementSyntax ParseBlockStatement()
+        {
+            var openBraceToken = MatchToken(SyntaxKind.OpenBraceToken);
+              var statements = ImmutableArray.CreateBuilder<StatementSyntax>();
+            while( Current.Kind != SyntaxKind.CloseBraceToken && Current.Kind != SyntaxKind.EndOfFileToken)
+            {
+                var statement = ParseStatement();
+                statements.Add(statement);
+            }
+            var closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken);
+            return new BlockStatemetnSyntax(openBraceToken, statements.ToImmutable(), closeBraceToken);
+        }
+
+        private ExpressionStatementSyntax ParseExpressionStatement()
+        {
+            var expression = ParseExpression();
+            return new ExpressionStatementSyntax(expression);
+        }
 
         private ExpressionSyntax ParseExpression() => ParseAssignmentExpression();
         // 在计算的基础上增加定于语句，eg, a=10,a=b=10

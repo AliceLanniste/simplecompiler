@@ -1,9 +1,13 @@
-using System;
-
 namespace Minsk.CodeAnalysis.Binding
 {
-    internal abstract class BoundExpression : BoundNode
+    internal sealed class BoundExpressionStatement : BoundStatement
     {
-         public abstract Type Type { get; }
+        public BoundExpressionStatement(BoundExpression expression)
+        {
+            Expression = expression;
+        }
+
+        public override BoundNodeKind Kind => BoundNodeKind.ExpressionStatement;
+        public BoundExpression Expression { get; }
     }
 }
