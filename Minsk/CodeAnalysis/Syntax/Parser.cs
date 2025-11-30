@@ -63,17 +63,17 @@ namespace Minsk.CodeAnalysis.Syntax
             return new SyntaxToken(kind, Current.Position, null, null);
         }
 
-       
-        public SyntaxTree Parse()
+        public CompilationUnitSyntax ParseCompilationUnit()
         {
-            var expresion = ParseExpression();
+            var expression = ParseExpression();
             var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-            return new SyntaxTree(_text,_diagnostics.ToImmutableArray(), expresion, endOfFileToken);
+            return new CompilationUnitSyntax(expression, endOfFileToken);
         }
+    
 
         private ExpressionSyntax ParseExpression() => ParseAssignmentExpression();
         // 在计算的基础上增加定于语句，eg, a=10,a=b=10
-        //     =
+        //     
         //    /   \
         //    a    10
         // 

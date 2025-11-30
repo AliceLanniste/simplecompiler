@@ -32,6 +32,9 @@ namespace Minsk.CodeAnalysis.Syntax
         ParenthesizedExpression,
         NameExpression,
         AssignmentExpression,
+
+        //unit
+        CompilationUnit
     }
 }
 
