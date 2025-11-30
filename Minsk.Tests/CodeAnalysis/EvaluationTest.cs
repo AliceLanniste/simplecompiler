@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Syntax;
@@ -7,7 +6,7 @@ using Xunit;
 namespace Minsk.Tests.CodeAnalysis
 {
     public class EvaluationTests
-    {       
+    {
         [Theory]
         [InlineData("1", 1)]
         [InlineData("+1", 1)]
@@ -29,18 +28,16 @@ namespace Minsk.Tests.CodeAnalysis
         [InlineData("false", false)]
         [InlineData("!true", false)]
         [InlineData("!false", true)]
-        [InlineData("(a = 10) * a", 100)]
-           public void SyntaxFact_GetText_RoundTrips(string text, object expectedValue)
+        [InlineData("{ var a = 0 (a = 10) * a }", 100)]
+        public void Evaluator_Computes_CorrectValues(string text, object expectedValue)
         {
-                var syntaxTree = SyntaxTree.Parse(text);
-                var comp = new Compilation(syntaxTree);
-                var variables = new Dictionary<VariableSymbol, object>();
-                var result = comp.Evaluate(variables);
-                
-                Assert.Empty(result.Diagnostics);
-                Assert.Equal(expectedValue, result.Value);
+            var syntaxTree = SyntaxTree.Parse(text);
+            var compilation = new Compilation(syntaxTree);
+            var variables = new Dictionary<VariableSymbol, object>();
+            var result = compilation.Evaluate(variables);
+
+            Assert.Empty(result.Diagnostics);
+            Assert.Equal(expectedValue, result.Value);
         }
-
     }
-
-}   
+}
