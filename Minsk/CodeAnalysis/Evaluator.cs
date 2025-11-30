@@ -8,7 +8,7 @@ namespace Minsk.CodeAnalysis
     {
         private readonly BoundStatement _root;
         private readonly Dictionary<VariableSymbol, object> _variables;
-
+        private object _lastedValue;
         public Evaluator(BoundStatement root, Dictionary<VariableSymbol, object> variables)
         {
             _root = root;
@@ -17,37 +17,46 @@ namespace Minsk.CodeAnalysis
 
         public object Evaluate()
         {
-            return EvaluateStatement(_root);
+            EvaluateStatement(_root);
+            return _lastedValue;
         }
 
-        private object EvaluateStatement(BoundStatement node)
+        private void EvaluateStatement(BoundStatement node)
         {
             switch (node.Kind)
             {
                 case BoundNodeKind.ExpressionStatement:
-                    return EvaluateExpressionStatement((BoundExpressionStatement)node);
+                     EvaluateExpressionStatement((BoundExpressionStatement)node);
+                     break;
+                case BoundNodeKind.VariableDeclaration:
+                     EvaluateVariableDeclaration((BoundVariableDeclaration)node);
+                     break;
                 case BoundNodeKind.BlockStatement:
-                    return EvaluateBlockStatement((BoundBlockStatement)node);
+                     EvaluateBlockStatement((BoundBlockStatement)node);
+                     break;
                 default:
                     throw new Exception($"Unexpected node {node.Kind}");
             }
         }
 
-        private object EvaluateBlockStatement(BoundBlockStatement node)
+        private void EvaluateBlockStatement(BoundBlockStatement node)
         {
-            object value = null;
 
             foreach (var statement in node.Statements)
-            {
-                value = EvaluateStatement(statement);
-            }
+                 EvaluateStatement(statement);
 
-            return value;
         }
 
-        private object EvaluateExpressionStatement(BoundExpressionStatement node)
+        private void EvaluateVariableDeclaration(BoundVariableDeclaration node)
         {
-            return EvaluateExpression(node.Expression);
+            var value = EvaluateExpression(node.Initializer);
+            _variables.Add(node.Variable, value);
+            _lastedValue = value;
+        }
+
+        private void EvaluateExpressionStatement(BoundExpressionStatement node)
+        {
+            _lastedValue = EvaluateExpression(node.Expression);
         }
 
         private object EvaluateExpression(BoundExpression node)

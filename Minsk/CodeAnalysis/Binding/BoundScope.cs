@@ -26,11 +26,6 @@ namespace Minsk.CodeAnalysis.Binding
         public bool TryLookup(string name, out VariableSymbol variable)
         {
 
-            // if (_variables.TryGetValue(name, out variable))
-            //     return true;
-            // if (Parent != null)
-            //     return Parent.TryLookup(name, out variable);
-            // return false;
             if (_variables.TryGetValue(name, out variable))
                 return true;
 

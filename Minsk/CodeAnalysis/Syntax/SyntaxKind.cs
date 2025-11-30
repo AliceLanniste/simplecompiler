@@ -25,6 +25,9 @@ namespace Minsk.CodeAnalysis.Syntax
         // Keywords
         FalseKeyword,
         TrueKeyword,
+        LetKeyword,
+        VarKeyword,
+
 
         // Expressions
         LiteralExpression,
@@ -39,6 +42,7 @@ namespace Minsk.CodeAnalysis.Syntax
         // Statements
         ExpressionStatement,
         BlockStatement,
+        VariableDeclaration,
     }
 }
 

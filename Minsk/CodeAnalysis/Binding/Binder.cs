@@ -32,10 +32,6 @@ namespace Minsk.CodeAnalysis.Binding
         }
 
         public DiagnosticBag Diagnostics => _diagnostics;
-        //^当在Program的时候，previous为null那么创建一个BoundScope
-        //^parent = new BoundScope(null) previous.globalScope = new BoundGlobalScope(null,scope.variabls,)
-        //^ previous = compilation
-        //^ 此时stack = 1,previous 抛出啦 ，然后重新创建一个BoundScope(parent=null)，然后这新scope  
 
        private static BoundScope CreateParentScope(BoundGlobalScope previous)
         {
@@ -66,6 +62,8 @@ namespace Minsk.CodeAnalysis.Binding
                     return BindExpressionStatement((ExpressionStatementSyntax)syntax);
                 case SyntaxKind.BlockStatement:
                     return BindBlockStatement((BlockStatementSyntax)syntax);
+                case SyntaxKind.VariableDeclaration:
+                    return BindVariableDeclaration((VariableDeclarationSyntax)syntax);
                 default:
                     throw new Exception($"Unexpected syntax {syntax.Kind}");
             }
@@ -91,22 +89,37 @@ namespace Minsk.CodeAnalysis.Binding
             }
         }
 
+        private BoundStatement BindVariableDeclaration(VariableDeclarationSyntax syntax)
+        {
+           
+            var initializer = BindExpression(syntax.Expression);
+            var isReadOnly = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
+            var name = syntax.Identifier.Text;
+            var variable = new VariableSymbol(name,isReadOnly, initializer.Type);
+            if (!_scope.TryDeclare(variable))
+            {
+                _diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name);
+            }
+            return new BoundVariableDeclaration(variable, initializer);
+        }
+
         private BoundStatement BindExpressionStatement(ExpressionStatementSyntax syntax)
         {  
             var boundExpression = BindExpression(syntax.Expression);
             return new BoundExpressionStatement(boundExpression);
         }
-
-
         private BoundStatement BindBlockStatement(BlockStatementSyntax syntax)
         {
             var boundStatements = new List<BoundStatement>();
+            _scope = new BoundScope(_scope);
+            Console.WriteLine($"before {_scope}");
             foreach (var statement in syntax.Statements)
             {
                 var boundStatement = BindStatement(statement);
                 boundStatements.Add(boundStatement);
             }
-
+            _scope = _scope.Parent;
+            Console.WriteLine($"after {_scope}");
             return new BoundBlockStatement(boundStatements.ToImmutableArray());
         }
 
@@ -142,9 +155,12 @@ namespace Minsk.CodeAnalysis.Binding
 
             if(!_scope.TryLookup(name,out var variable))
             {
-                variable = new VariableSymbol(name, boundExpression.Type);
-                _scope.TryDeclare(variable);
+                _diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
+                return boundExpression;
             }
+
+            if (variable.IsReadOnly)
+                _diagnostics.ReportCannotAssign(syntax.EqualsToken.Span, name);
 
             if (boundExpression.Type != variable.Type)
             {

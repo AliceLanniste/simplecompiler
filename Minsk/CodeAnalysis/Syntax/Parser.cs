@@ -76,12 +76,22 @@ namespace Minsk.CodeAnalysis.Syntax
             {
                 case SyntaxKind.OpenBraceToken:
                     return ParseBlockStatement();
-                
+                case SyntaxKind.LetKeyword:
+                case SyntaxKind.VarKeyword:
+                    return ParseDeclarationStatement();
                 default:
                     return ParseExpressionStatement();
             }
         }
 
+        private StatementSyntax ParseDeclarationStatement()
+        {
+            var keyword = MatchToken(Current.Kind == SyntaxKind.LetKeyword ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
+            var identifierToken = MatchToken(SyntaxKind.IdentifierToken);
+            var equalsToken = MatchToken(SyntaxKind.EqualsToken);
+            var expression = ParseExpression();
+            return new VariableDeclarationSyntax(keyword, identifierToken, equalsToken, expression);
+        }
         private BlockStatementSyntax ParseBlockStatement()
         {
             var openBraceToken = MatchToken(SyntaxKind.OpenBraceToken);
