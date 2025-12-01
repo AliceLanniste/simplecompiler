@@ -126,7 +126,28 @@ namespace Minsk.CodeAnalysis.Syntax
                 case '5': case '6': case '7': case '8': case '9':
                     ReadNumberToken();
                     break;
-
+                case '<':
+                   _position++;
+                   if(Current != '=')
+                    {
+                        _kind = SyntaxKind.LessToken;
+                    }else
+                    {
+                        _position ++;
+                        _kind = SyntaxKind.LessOrEqualsToken;
+                    }
+                    break;
+                case '>':
+                    _position++;
+                    if(Current != '=')
+                    {
+                        _kind = SyntaxKind.GreaterToken;
+                    }else
+                    {
+                        _position++;
+                        _kind = SyntaxKind.GreaterOrEqualsToken;
+                    }
+                    break;
                 case ' ':
                 case '\t':
                 case '\n':

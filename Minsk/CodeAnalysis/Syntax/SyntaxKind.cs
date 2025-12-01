@@ -22,6 +22,10 @@ namespace Minsk.CodeAnalysis.Syntax
         IdentifierToken,
         OpenBraceToken,
         CloseBraceToken,
+        LessToken,
+        LessOrEqualsToken,
+        GreaterToken,
+        GreaterOrEqualsToken,
         // Keywords
         FalseKeyword,
         TrueKeyword,

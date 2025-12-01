@@ -112,14 +112,12 @@ namespace Minsk.CodeAnalysis.Binding
         {
             var boundStatements = new List<BoundStatement>();
             _scope = new BoundScope(_scope);
-            Console.WriteLine($"before {_scope}");
             foreach (var statement in syntax.Statements)
             {
                 var boundStatement = BindStatement(statement);
                 boundStatements.Add(boundStatement);
             }
             _scope = _scope.Parent;
-            Console.WriteLine($"after {_scope}");
             return new BoundBlockStatement(boundStatements.ToImmutableArray());
         }
 

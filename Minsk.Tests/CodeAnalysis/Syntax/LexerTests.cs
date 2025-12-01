@@ -109,7 +109,7 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
         private static bool RequiresSeparator(SyntaxKind t1Kind, SyntaxKind t2Kind)
         {
-            var t1IsKeyword = t1Kind.ToString().EndsWith("Keyword");
+             var t1IsKeyword = t1Kind.ToString().EndsWith("Keyword");
             var t2IsKeyword = t2Kind.ToString().EndsWith("Keyword");
 
             if (t1Kind == SyntaxKind.IdentifierToken && t2Kind == SyntaxKind.IdentifierToken)
@@ -139,6 +139,17 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
             if (t1Kind == SyntaxKind.EqualsToken && t2Kind == SyntaxKind.EqualsEqualsToken)
                 return true;
 
+            if (t1Kind == SyntaxKind.LessToken && t2Kind == SyntaxKind.EqualsToken)
+                return true;
+
+            if (t1Kind == SyntaxKind.LessToken && t2Kind == SyntaxKind.EqualsEqualsToken)
+                return true;
+
+            if (t1Kind == SyntaxKind.GreaterToken && t2Kind == SyntaxKind.EqualsToken)
+                return true;
+
+            if (t1Kind == SyntaxKind.GreaterToken && t2Kind == SyntaxKind.EqualsEqualsToken)
+                return true;
             return false;
         }
 
@@ -172,3 +183,4 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
         }
     }
 }
+
