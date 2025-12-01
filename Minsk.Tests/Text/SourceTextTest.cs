@@ -108,7 +108,7 @@ namespace Minsk.Tests.CodeAnalysis.Text
             ";
 
             var diagnostics = @"
-                Cannot convert type System.Boolean to System.Int32.
+                Cannot convert type 'System.Boolean' to 'System.Int32'.
             ";
 
             AssertDiagnostics(text, diagnostics);
@@ -120,7 +120,7 @@ namespace Minsk.Tests.CodeAnalysis.Text
             var text = @"[+]true";
 
             var diagnostics = @"
-                Unary operator '+' is not defined for type System.Boolean.
+                Unary operator '+' is not defined for type 'System.Boolean'.
             ";
 
             AssertDiagnostics(text, diagnostics);
@@ -132,7 +132,7 @@ namespace Minsk.Tests.CodeAnalysis.Text
             var text = @"10 [*] false";
 
             var diagnostics = @"
-                Binary operator '*' is not defined for types System.Int32 and System.Boolean.
+                Binary operator '*' is not defined for types 'System.Int32' and 'System.Boolean'.
             ";
 
             AssertDiagnostics(text, diagnostics);
