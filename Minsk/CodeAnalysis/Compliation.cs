@@ -13,7 +13,6 @@ namespace Minsk.CodeAnalysis
         public Compilation(SyntaxTree syntaxTree)
             : this(null, syntaxTree)
         {
-            SyntaxTree = syntaxTree;
         }
 
 
@@ -29,6 +28,7 @@ namespace Minsk.CodeAnalysis
             {
                 if (_globalScope == null)
                 {
+                    Console.WriteLine($"Binding... {Previous}");
                     var globalScope = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTree.Root);
                     Interlocked.CompareExchange(ref _globalScope, globalScope, null);
                 }
