@@ -33,7 +33,7 @@ namespace Minsk.CodeAnalysis.Syntax
         VarKeyword,
         IfKeyword,
         ElseKeyword,
-
+        WhileKeyword,
 
         // Expressions
         LiteralExpression,
@@ -50,7 +50,8 @@ namespace Minsk.CodeAnalysis.Syntax
         BlockStatement,
         VariableDeclaration,
         IfStatement,
-        ElseClause
+        ElseClause,
+        WhileStatement,
     }
 }
 

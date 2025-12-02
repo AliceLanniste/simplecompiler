@@ -13,5 +13,6 @@ namespace Minsk.CodeAnalysis.Binding
         UnaryExpression,
         BinaryExpression,
         IfStatement,
+        WhileStatement,
     }
 }

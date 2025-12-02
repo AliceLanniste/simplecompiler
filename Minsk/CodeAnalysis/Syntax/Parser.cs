@@ -81,9 +81,19 @@ namespace Minsk.CodeAnalysis.Syntax
                     return ParseDeclarationStatement();
                 case SyntaxKind.IfKeyword:
                     return ParseIfStatement();
+                case SyntaxKind.WhileKeyword:
+                    return ParseWhileStatement();
                 default:
                     return ParseExpressionStatement();
             }
+        }
+
+        private StatementSyntax ParseWhileStatement()
+        {
+            var whileKeyword = MatchToken(SyntaxKind.WhileKeyword);
+            var condition = ParseExpression();
+            var body = ParseStatement();
+            return new WhileStatementSyntax(whileKeyword, condition, body);
         }
 
         private StatementSyntax ParseDeclarationStatement()
