@@ -58,7 +58,7 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             if (Current.Kind == kind)
                 return NextToken();
-
+            Console.WriteLine($"Expected {kind} but got {Current.Kind}");
             _diagnostics.ReportUnexpectedToken(Current.Span,Current.Kind, kind);
             return new SyntaxToken(kind, Current.Position, null, null);
         }
@@ -124,8 +124,14 @@ namespace Minsk.CodeAnalysis.Syntax
               var statements = ImmutableArray.CreateBuilder<StatementSyntax>();
             while( Current.Kind != SyntaxKind.CloseBraceToken && Current.Kind != SyntaxKind.EndOfFileToken)
             {
+               var startToken = Current;
                 var statement = ParseStatement();
                 statements.Add(statement);
+
+                if (Current == startToken)
+                {
+                    NextToken();
+                }
             }
             var closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken);
             return new BlockStatementSyntax(openBraceToken, statements.ToImmutable(), closeBraceToken);
@@ -244,7 +250,7 @@ namespace Minsk.CodeAnalysis.Syntax
 
         private ExpressionSyntax ParseNameExpression()
         {
-               var IdentifierToken = MatchToken(SyntaxKind.IdentifierToken);
+            var IdentifierToken = MatchToken(SyntaxKind.IdentifierToken);
             return new NameExpressionSyntax(IdentifierToken);
         }
 

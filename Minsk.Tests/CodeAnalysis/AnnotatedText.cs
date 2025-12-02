@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Text;
-using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Text;
 
-namespace Minsk.Tests.CodeAnalysis.Text
+namespace Minsk.Tests.CodeAnalysis
 {
     internal sealed class AnnotatedText
     {
@@ -17,9 +16,9 @@ namespace Minsk.Tests.CodeAnalysis.Text
         }
 
         public string Text { get; }
-        public ImmutableArray<TextSpan> Spans { get; } 
+        public ImmutableArray<TextSpan> Spans { get; }
 
-        public static AnnotatedText Parser(string text)
+        public static AnnotatedText Parse(string text)
         {
             text = Unindent(text);
 
@@ -58,57 +57,53 @@ namespace Minsk.Tests.CodeAnalysis.Text
             return new AnnotatedText(textBuilder.ToString(), spanBuilder.ToImmutable());
         }
 
-       
-
-        public static string Unindent(string text)
+        private static string Unindent(string text)
         {
             var lines = UnindentLines(text);
             return string.Join(Environment.NewLine, lines);
         }
+
         public static string[] UnindentLines(string text)
         {
             var lines = new List<string>();
-            using(var reader = new StringReader(text))
+
+            using (var reader = new StringReader(text))
             {
                 string line;
-
                 while ((line = reader.ReadLine()) != null)
-                {
                     lines.Add(line);
-                }
             }
+
             var minIndentation = int.MaxValue;
             for (var i = 0; i < lines.Count; i++)
             {
                 var line = lines[i];
+
                 if (line.Trim().Length == 0)
-                {   lines[i] = string.Empty;
-                    continue;                    
+                {
+                    lines[i] = string.Empty;
+                    continue;
                 }
 
                 var indentation = line.Length - line.TrimStart().Length;
-                minIndentation = Math.Min(indentation, minIndentation);
+                minIndentation = Math.Min(minIndentation, indentation);
             }
+
             for (var i = 0; i < lines.Count; i++)
             {
-                if (lines[i].Trim().Length == 0)
+                if (lines[i].Length == 0)
                     continue;
 
                 lines[i] = lines[i].Substring(minIndentation);
             }
-            while (lines.Count > 0 && lines[0].Length == 0)
-            {
-                lines.RemoveAt(0);
-            }
 
-            while (lines.Count > 0 && lines[lines.Count-1].Length == 0)
-            {
-                lines.RemoveAt(lines.Count-1);
-            }
+            while (lines.Count > 0 && lines[0].Length == 0)
+                lines.RemoveAt(0);
+
+            while (lines.Count > 0 && lines[lines.Count - 1].Length == 0)
+                lines.RemoveAt(lines.Count - 1);
 
             return lines.ToArray();
         }
-    
-    
     }
 }
