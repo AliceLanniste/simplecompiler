@@ -58,7 +58,6 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             if (Current.Kind == kind)
                 return NextToken();
-            Console.WriteLine($"Expected {kind} but got {Current.Kind}");
             _diagnostics.ReportUnexpectedToken(Current.Span,Current.Kind, kind);
             return new SyntaxToken(kind, Current.Position, null, null);
         }
