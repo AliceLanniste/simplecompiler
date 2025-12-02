@@ -22,7 +22,6 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
             untestedTokenKinds.Remove(SyntaxKind.BadToken);
             untestedTokenKinds.Remove(SyntaxKind.EndOfFileToken);
             untestedTokenKinds.ExceptWith(testedTokenKinds);
-
             Assert.Empty(untestedTokenKinds);
         }
 

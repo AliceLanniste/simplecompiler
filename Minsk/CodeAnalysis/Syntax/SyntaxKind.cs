@@ -34,6 +34,8 @@ namespace Minsk.CodeAnalysis.Syntax
         IfKeyword,
         ElseKeyword,
         WhileKeyword,
+        ForKeyword,
+        ToKeyword,
 
         // Expressions
         LiteralExpression,
@@ -52,6 +54,7 @@ namespace Minsk.CodeAnalysis.Syntax
         IfStatement,
         ElseClause,
         WhileStatement,
+        ForStatement
     }
 }
 

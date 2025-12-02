@@ -14,5 +14,6 @@ namespace Minsk.CodeAnalysis.Binding
         BinaryExpression,
         IfStatement,
         WhileStatement,
+        ForStatement,
     }
 }
