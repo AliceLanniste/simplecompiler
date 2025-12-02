@@ -79,6 +79,8 @@ namespace Minsk.CodeAnalysis.Syntax
                 case SyntaxKind.LetKeyword:
                 case SyntaxKind.VarKeyword:
                     return ParseDeclarationStatement();
+                case SyntaxKind.IfKeyword:
+                    return ParseIfStatement();
                 default:
                     return ParseExpressionStatement();
             }
@@ -103,7 +105,25 @@ namespace Minsk.CodeAnalysis.Syntax
             }
             var closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken);
             return new BlockStatementSyntax(openBraceToken, statements.ToImmutable(), closeBraceToken);
-    }
+        }
+        private StatementSyntax ParseIfStatement()
+        {
+            var ifKeyword = MatchToken(SyntaxKind.IfKeyword);
+            var condition = ParseExpression();
+            var thenStatement = ParseStatement();
+            var elseClause = ParseElseClause();
+            return new IfStatementSyntax(ifKeyword, condition, thenStatement, elseClause);
+        }
+
+        private ElseClauseSyntax ParseElseClause()
+        {
+            if (Current.Kind != SyntaxKind.ElseKeyword)
+                return null;
+
+            var elseKeyword = NextToken();
+            var statement = ParseStatement();
+            return new ElseClauseSyntax(elseKeyword, statement);
+        }
 
         private ExpressionStatementSyntax ParseExpressionStatement()
         {
@@ -136,7 +156,7 @@ namespace Minsk.CodeAnalysis.Syntax
 
             return ParseBinaryExpression();
         }
-        private ExpressionSyntax ParseBinaryExpression(int parentPrecedence = 0)
+         private ExpressionSyntax ParseBinaryExpression(int parentPrecedence = 0)
         {
             ExpressionSyntax left;
             var unaryOperatorPrecedence = Current.Kind.GetUnaryOperatorPrecedence();

@@ -64,6 +64,8 @@ namespace Minsk.CodeAnalysis.Binding
                     return BindBlockStatement((BlockStatementSyntax)syntax);
                 case SyntaxKind.VariableDeclaration:
                     return BindVariableDeclaration((VariableDeclarationSyntax)syntax);
+                case SyntaxKind.IfStatement:
+                    return BindIfStatement((IfStatementSyntax)syntax);
                 default:
                     throw new Exception($"Unexpected syntax {syntax.Kind}");
             }
@@ -92,7 +94,7 @@ namespace Minsk.CodeAnalysis.Binding
         private BoundStatement BindVariableDeclaration(VariableDeclarationSyntax syntax)
         {
            
-            var initializer = BindExpression(syntax.Expression);
+            var initializer = BindExpression(syntax.Initializer);
             var isReadOnly = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
             var name = syntax.Identifier.Text;
             var variable = new VariableSymbol(name,isReadOnly, initializer.Type);
@@ -121,6 +123,23 @@ namespace Minsk.CodeAnalysis.Binding
             return new BoundBlockStatement(boundStatements.ToImmutableArray());
         }
 
+        private BoundStatement BindIfStatement(IfStatementSyntax syntax)
+        {
+            var condition = BindExpression(syntax.Condition,typeof(bool));
+            var thenStatement = BindStatement(syntax.ThenStatement);
+            var elseStatement = syntax.ElseClause == null ? null : BindStatement(syntax.ElseClause.ElseStatement );
+            return new BoundIfStatement(condition, thenStatement, elseStatement);
+        }
+
+        private BoundExpression BindExpression(ExpressionSyntax syntax, Type targetType)
+        {
+           var result = BindExpression(syntax);
+            if (result.Type != targetType)
+                _diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
+                
+
+            return result;
+        }
 
         private BoundExpression BindParenthesizedExpression(ParenthesizedExpressionSyntax syntax)
         {
@@ -199,4 +218,3 @@ namespace Minsk.CodeAnalysis.Binding
         }
     }
 }
-

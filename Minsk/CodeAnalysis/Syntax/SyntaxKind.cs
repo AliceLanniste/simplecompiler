@@ -31,6 +31,8 @@ namespace Minsk.CodeAnalysis.Syntax
         TrueKeyword,
         LetKeyword,
         VarKeyword,
+        IfKeyword,
+        ElseKeyword,
 
 
         // Expressions
@@ -47,6 +49,8 @@ namespace Minsk.CodeAnalysis.Syntax
         ExpressionStatement,
         BlockStatement,
         VariableDeclaration,
+        IfStatement,
+        ElseClause
     }
 }
 

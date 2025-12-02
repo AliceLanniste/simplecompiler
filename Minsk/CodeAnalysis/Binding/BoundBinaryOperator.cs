@@ -34,6 +34,7 @@ namespace Minsk.CodeAnalysis.Binding
 
         private static BoundBinaryOperator[] _operators =
         {
+        
             new BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, typeof(int)),
             new BoundBinaryOperator(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction, typeof(int)),
             new BoundBinaryOperator(SyntaxKind.StarToken, BoundBinaryOperatorKind.Multiplication, typeof(int)),
@@ -44,7 +45,6 @@ namespace Minsk.CodeAnalysis.Binding
             new BoundBinaryOperator(SyntaxKind.LessOrEqualsToken, BoundBinaryOperatorKind.LessOrEquals, typeof(int), typeof(bool)),
             new BoundBinaryOperator(SyntaxKind.GreaterToken, BoundBinaryOperatorKind.Greater, typeof(int), typeof(bool)),
             new BoundBinaryOperator(SyntaxKind.GreaterOrEqualsToken, BoundBinaryOperatorKind.GreaterOrEquals, typeof(int), typeof(bool)),
-
 
             new BoundBinaryOperator(SyntaxKind.AmpersandAmpersandToken, BoundBinaryOperatorKind.LogicalAnd, typeof(bool)),
             new BoundBinaryOperator(SyntaxKind.PipePipeToken, BoundBinaryOperatorKind.LogicalOr, typeof(bool)),
@@ -57,7 +57,8 @@ namespace Minsk.CodeAnalysis.Binding
             foreach (var op in _operators)
             {
                 if (op.SyntaxKind == syntaxKind && op.LeftType == leftType && op.RightTye == rightType)
-                    return op;
+                    return op;                    
+                
             }
 
             return null;

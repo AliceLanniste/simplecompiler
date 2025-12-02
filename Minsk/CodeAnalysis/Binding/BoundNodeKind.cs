@@ -12,5 +12,6 @@ namespace Minsk.CodeAnalysis.Binding
         AssignmentExpression,
         UnaryExpression,
         BinaryExpression,
+        IfStatement,
     }
 }
