@@ -79,5 +79,7 @@ namespace Minsk.CodeAnalysis.Syntax
                 return writer.ToString();
             }
         }
+   
+   
     }
 }
