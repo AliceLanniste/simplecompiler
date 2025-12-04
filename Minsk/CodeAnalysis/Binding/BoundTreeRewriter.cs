@@ -1,6 +1,9 @@
+using System;
+using System.Collections.Immutable;
+
 namespace  Minsk.CodeAnalysis.Binding
 {
-    internal sealed class BoundTreeRewriter
+    internal abstract class BoundTreeRewriter
     {
         public virtual BoundStatement RewriteStatement(BoundStatement node)
         {
@@ -102,14 +105,6 @@ namespace  Minsk.CodeAnalysis.Binding
                 return node;
             
             return new BoundVariableDeclaration(node.Variable, initializer);
-        }
-        protected virtual BoundStatement RewriteAssignmentStatement(BoundAssignStatement  node)
-        {
-            var expression = RewriteExpression(node.Expression);
-            if (expression == node.Expression)
-                return node;
-
-            return new BoundAssignStatement(node.Variable, expression);
         }
 
         public virtual BoundExpression RewriteExpression(BoundExpression node)
