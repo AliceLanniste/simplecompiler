@@ -12,6 +12,7 @@ namespace Minsk.CodeAnalysis.Syntax
         StarToken,
         SlashToken,
         BangToken,
+        AmpersandToken,
         AmpersandAmpersandToken,
         EqualsToken,
         EqualsEqualsToken,
@@ -26,6 +27,9 @@ namespace Minsk.CodeAnalysis.Syntax
         LessOrEqualsToken,
         GreaterToken,
         GreaterOrEqualsToken,
+        TildeToken,
+        HatToken,
+        PipeToken,
         // Keywords
         FalseKeyword,
         TrueKeyword,
