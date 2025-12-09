@@ -21,10 +21,15 @@ namespace Minsk
             {
                 var isKeyword = token.Kind.ToString().EndsWith("Keyword");
                 var isNumber = token.Kind == SyntaxKind.NumberToken;
+                var isIdentifier = token.Kind == SyntaxKind.IdentifierToken;
 
                 if (isKeyword)
                     Console.ForegroundColor = ConsoleColor.Blue;
-                else if (!isNumber)
+                else if (isIdentifier)
+                    Console.ForegroundColor = ConsoleColor.DarkYellow;
+                else if (isNumber)
+                    Console.ForegroundColor = ConsoleColor.Cyan;
+                else
                     Console.ForegroundColor = ConsoleColor.DarkGray;
 
                 Console.Write(token.Text);
@@ -63,6 +68,14 @@ namespace Minsk
             if (string.IsNullOrEmpty(text))
                 return true;
 
+            var lastTwoLinesAreBlank = text.Split(Environment.NewLine)
+                                           .Reverse()
+                                           .TakeWhile(s => string.IsNullOrEmpty(s))
+                                           .Take(2)
+                                           .Count() == 2;
+            if (lastTwoLinesAreBlank)
+                return true;    
+
             var syntaxTree = SyntaxTree.Parse(text);
 
             // Use Statement because we need to exclude the EndOfFileToken.
@@ -71,7 +84,6 @@ namespace Minsk
             
             return true;
         }
-
 
         protected override void EvaluateSubmission(string text)
         {
