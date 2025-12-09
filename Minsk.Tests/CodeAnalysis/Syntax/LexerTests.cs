@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis.Syntax;
+using Minsk.CodeAnalysis.Text;
 using Xunit;
 
 namespace Minsk.Tests.CodeAnalysis.Syntax
@@ -9,6 +10,22 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
     public class LexerTests
     {
+        [Fact]
+        public void Lexer_Lexes_UnterminatedString()
+        {
+            var text = "\"text";
+            var tokens = SyntaxTree.ParseTokens(text,out var diagnostics);
+
+            var token = Assert.Single(tokens);
+            Assert.Equal(SyntaxKind.StringToken, token.Kind);
+            Assert.Equal(text, token.Text);   
+
+            var diagnostic = Assert.Single(diagnostics);
+            Assert.Equal(new TextSpan(0, 1), diagnostic.Span);
+            Assert.Equal("Unterminated string literal.", diagnostic.Message);
+        }
+      
+      
        [Fact]
         public void Lexer_Lexes_Token()
         {   var tokenKinds = Enum.GetValues(typeof(SyntaxKind))
@@ -89,6 +106,8 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
                 (SyntaxKind.NumberToken, "123"),
                 (SyntaxKind.IdentifierToken, "a"),
                 (SyntaxKind.IdentifierToken, "abc"),
+                (SyntaxKind.StringToken, "\"Test\""),
+                (SyntaxKind.StringToken, "\"Te\"\"st\""),
             };
 
             return fixedTokens.Concat(dynamicTokens);
@@ -161,6 +180,10 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
             if (t1Kind == SyntaxKind.PipeToken && t2Kind == SyntaxKind.PipePipeToken)
                 return true;
+
+            if (t1Kind == SyntaxKind.StringToken && t2Kind == SyntaxKind.StringToken)
+                return true;
+
             return false;
         }
 

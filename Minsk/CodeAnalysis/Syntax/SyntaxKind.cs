@@ -39,6 +39,7 @@ namespace Minsk.CodeAnalysis.Syntax
         ElseKeyword,
         WhileKeyword,
         ForKeyword,
+        StringToken,
         ToKeyword,
 
         // Expressions

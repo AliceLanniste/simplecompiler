@@ -88,6 +88,7 @@ namespace Minsk.CodeAnalysis.Syntax
                     return ParseExpressionStatement();
             }
         }
+       
 
         private StatementSyntax ParseWhileStatement()
         {
@@ -225,6 +226,8 @@ namespace Minsk.CodeAnalysis.Syntax
                     return ParseBooleanLiteral();
                 case SyntaxKind.NumberToken:
                     return ParseNumberLiteral();
+                case SyntaxKind.StringToken:
+                    return ParseStringLiteral();
                 case SyntaxKind.IdentifierToken:
                 default:
                     return ParseNameExpression();
@@ -259,6 +262,11 @@ namespace Minsk.CodeAnalysis.Syntax
             return new LiteralExpressionSyntax(numberToken);
         }
       
+        private ExpressionSyntax ParseStringLiteral()
+        {
+            var stringLiteral = MatchToken(SyntaxKind.StringToken);
+            return new LiteralExpressionSyntax(stringLiteral);
+        }
     }
 }
 
