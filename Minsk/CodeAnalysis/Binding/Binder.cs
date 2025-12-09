@@ -102,12 +102,8 @@ namespace Minsk.CodeAnalysis.Binding
           var upperBound = BindExpression(syntax.UpperBound, TypeSymbol.Int);
          
           _scope = new BoundScope(_scope);
-          var name = syntax.Identifier.Text;
-          var variable = new VariableSymbol(name, true, TypeSymbol.Int);
-          if (!_scope.TryDeclare(variable))
-          {
-              _diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name);
-          }
+          var  variable = BindVariable(syntax.Identifier, true, TypeSymbol.Int);
+
           var body = BindStatement(syntax.Body);
           _scope = _scope.Parent;
           return new BoundForStatement(variable, lowerBound, upperBound, body);
@@ -125,12 +121,8 @@ namespace Minsk.CodeAnalysis.Binding
            
             var initializer = BindExpression(syntax.Initializer);
             var isReadOnly = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
-            var name = syntax.Identifier.Text;
-            var variable = new VariableSymbol(name,isReadOnly, initializer.Type);
-            if (!_scope.TryDeclare(variable))
-            {
-                _diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name);
-            }
+            var variable = BindVariable(syntax.Identifier, isReadOnly, initializer.Type);
+           
             return new BoundVariableDeclaration(variable, initializer);
         }
 
@@ -188,7 +180,7 @@ namespace Minsk.CodeAnalysis.Binding
         {
             var name = syntax.IdentifierToken.Text;
 
-             if (string.IsNullOrEmpty(name))
+             if (syntax.IdentifierToken.IsMissing)
             {
                 // This means the token was inserted by the parser. We already
                 // reported error so we can just return an error expression.
@@ -259,6 +251,18 @@ namespace Minsk.CodeAnalysis.Binding
             }
 
             return new BoundBinaryExpression(boundLeft, boundOperator, boundRight);
+        }
+    
+        private VariableSymbol BindVariable(SyntaxToken identifierToken, bool isReadOnly, TypeSymbol type)
+        {
+            var name = identifierToken.Text ?? "?";
+            var declare = !identifierToken.IsMissing;
+            var variable = new VariableSymbol(name, isReadOnly, type);
+            
+            if (declare && !_scope.TryDeclare(variable))
+                _diagnostics.ReportVariableAlreadyDeclared(identifierToken.Span, name);
+
+            return variable;
         }
     }
 }
