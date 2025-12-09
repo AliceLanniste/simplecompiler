@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis.Syntax;
 using System.Collections.Immutable;
+using Minsk.CodeAnalysis.Symbol;
 
 namespace Minsk.CodeAnalysis.Binding
 {

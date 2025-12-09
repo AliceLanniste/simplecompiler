@@ -1,4 +1,4 @@
-namespace Minsk.CodeAnalysis
+namespace Minsk.CodeAnalysis.Symbol
 {
     public sealed class VariableSymbol
     {

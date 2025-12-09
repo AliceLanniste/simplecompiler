@@ -5,6 +5,7 @@ using System.Linq;
 using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis.Lowering; 
+using Minsk.CodeAnalysis.Symbol;
 
 namespace Minsk.CodeAnalysis
 {

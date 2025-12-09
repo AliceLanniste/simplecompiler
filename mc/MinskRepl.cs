@@ -4,6 +4,7 @@ using System.Linq;
 using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis.Text;
+using Minsk.CodeAnalysis.Symbol;
 
 namespace Minsk
 {
