@@ -12,6 +12,8 @@ namespace Minsk.CodeAnalysis
 
         private object _lastValue;
 
+        private Random _random;
+
         public Evaluator(BoundBlockStatement root, Dictionary<VariableSymbol, object> variables)
         {
             _root = root;
@@ -111,7 +113,15 @@ namespace Minsk.CodeAnalysis
             } else if (node.Function == BuiltinFunctions.Input)
             {
                 return Console.ReadLine();
-            } else
+            } else if (node.Function == BuiltinFunctions.Rnd)
+            {
+                var max = (int)EvaluateExpression(node.Arguments[0]);
+                if (_random == null)
+                    _random = new Random();
+
+                return _random.Next(max);
+            }
+            else
             {
               throw new Exception($"Unexpected function {node.Function}");
             }
