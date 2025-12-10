@@ -43,18 +43,25 @@ namespace Minsk.CodeAnalysis.Binding
                 previous = previous.Previous;
             }
 
-            BoundScope parent = null;
+            var parent = CreateRootScope();
             while (stack.Count > 0)
             {
                 previous = stack.Pop();
                 var scope = new BoundScope(parent); 
                 foreach (var v in previous.Variables)
-                    scope.TryDeclare(v);
+                    scope.TryDeclareVariable(v);
                 parent = scope;
             }
             return parent;
         }
 
+        private static BoundScope CreateRootScope()
+        {
+            var scope = new BoundScope(null);
+            foreach (var f in BuiltinFunctions.GetAll())
+                scope.TryDeclareFunction(f);
+            return scope;
+        }
         public BoundStatement BindStatement(StatementSyntax syntax)
         {
             switch (syntax.Kind)
@@ -188,10 +195,7 @@ namespace Minsk.CodeAnalysis.Binding
                 boundArguments.Add(boundArgument);
             }
 
-            var functions = BuiltinFunctions.GetAll();
-            var function = functions.SingleOrDefault(f => f.Name == syntax.IdentifierToken.Text);
-
-            if (function == null)
+            if (!_scope.TryLookupFunction(syntax.IdentifierToken.Text, out var function))
             {
                 _diagnostics.ReportUndefinedFunction(syntax.IdentifierToken.Span, syntax.IdentifierToken.Text);
                 return new BoundErrorExpression();
@@ -238,7 +242,7 @@ namespace Minsk.CodeAnalysis.Binding
                 // reported error so we can just return an error expression.
                 return new BoundLiteralExpression(0);
             }
-            if(!_scope.TryLookup(name, out var variable))
+            if(!_scope.TryLookupVariable(name, out var variable))
             {
                 _diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
                 return new BoundLiteralExpression(0);
@@ -252,7 +256,7 @@ namespace Minsk.CodeAnalysis.Binding
             var name = syntax.IdentifierToken.Text;
             var boundExpression = BindExpression(syntax.Expression);
 
-            if(!_scope.TryLookup(name,out var variable))
+            if(!_scope.TryLookupVariable(name,out var variable))
             {
                 _diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name);
                 return new BoundErrorExpression();
@@ -311,7 +315,7 @@ namespace Minsk.CodeAnalysis.Binding
             var declare = !identifierToken.IsMissing;
             var variable = new VariableSymbol(name, isReadOnly, type);
             
-            if (declare && !_scope.TryDeclare(variable))
+            if (declare && !_scope.TryDeclareVariable(variable))
                 _diagnostics.ReportVariableAlreadyDeclared(identifierToken.Span, name);
 
             return variable;
