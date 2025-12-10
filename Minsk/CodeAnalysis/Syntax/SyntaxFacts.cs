@@ -268,6 +268,8 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (kind)
             {
+                case SyntaxKind.CommaToken:
+                    return ",";
                 case SyntaxKind.PlusToken:
                     return "+";
                 case SyntaxKind.MinusToken:
