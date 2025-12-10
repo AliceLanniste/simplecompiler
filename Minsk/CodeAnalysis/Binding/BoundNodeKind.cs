@@ -7,6 +7,7 @@ namespace Minsk.CodeAnalysis.Binding
         BlockStatement,
         VariableDeclaration,
         ExpressionStatement,
+        CallExpression,
         ErrorExpression,
         LiteralExpression,
         VariableExpression,

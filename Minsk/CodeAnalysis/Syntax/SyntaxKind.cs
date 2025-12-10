@@ -4,6 +4,7 @@ namespace Minsk.CodeAnalysis.Syntax
     {
         // Tokens
         BadToken,
+        CommaToken,
         EndOfFileToken,
         WhitespaceToken,
         NumberToken,
@@ -43,6 +44,7 @@ namespace Minsk.CodeAnalysis.Syntax
         ToKeyword,
 
         // Expressions
+        CallExpression,
         LiteralExpression,
         UnaryExpression,
         BinaryExpression,
