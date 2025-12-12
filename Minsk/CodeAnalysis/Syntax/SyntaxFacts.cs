@@ -221,6 +221,8 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (text)
             {
+                case "do":
+                    return SyntaxKind.DoKeyword;
                 case "else":
                     return SyntaxKind.ElseKeyword;
                 case "false":
@@ -268,6 +270,8 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (kind)
             {
+                case SyntaxKind.DoKeyword:
+                    return "do";
                 case SyntaxKind.CommaToken:
                     return ",";
                 case SyntaxKind.PlusToken:

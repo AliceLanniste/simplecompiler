@@ -4,6 +4,7 @@ namespace Minsk.CodeAnalysis.Binding
     internal enum BoundNodeKind
     {
         //statement
+        DoWhileStatement,
         BlockStatement,
         VariableDeclaration,
         ExpressionStatement,

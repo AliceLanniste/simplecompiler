@@ -32,6 +32,7 @@ namespace Minsk.CodeAnalysis.Syntax
         HatToken,
         PipeToken,
         // Keywords
+        DoKeyword,
         FalseKeyword,
         TrueKeyword,
         LetKeyword,
@@ -55,6 +56,7 @@ namespace Minsk.CodeAnalysis.Syntax
         //unit
         CompilationUnit,
         // Statements
+        DoWhileStatement,
         ExpressionStatement,
         BlockStatement,
         VariableDeclaration,

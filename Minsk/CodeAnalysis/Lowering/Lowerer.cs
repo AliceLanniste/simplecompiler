@@ -142,6 +142,44 @@ namespace Minsk.CodeAnalysis.Lowering
             return RewriteStatement(result);
         }
 
+          protected override BoundStatement RewriteDoWhileStatement(BoundDoWhileStatement node)
+        {
+            // do
+            //      <bode>
+            // while <condition>
+            //
+            // ----->
+            //
+            // continue:
+            // <body>
+            // goto check
+            // check:
+            // gotoTrue <condition> continue
+            // end:
+            //
+
+            var continueLabel = GenerateLabel();
+            var checkLabel = GenerateLabel();
+            var endLabel = GenerateLabel();
+
+            var continueLabelStatement = new BoundLabelStatement(continueLabel);
+            var gotoCheck = new BoundGotoStatement(checkLabel);
+            var checkLabelStatement = new BoundLabelStatement(checkLabel);
+            var gotoTrue = new BoundConditionalGotoStatement(continueLabel, node.Condition);
+            var endLabelStatement = new BoundLabelStatement(endLabel);
+
+            var result = new BoundBlockStatement(ImmutableArray.Create<BoundStatement>(
+                continueLabelStatement,
+                node.Body,
+                gotoCheck,
+                checkLabelStatement,
+                gotoTrue,
+                endLabelStatement
+            ));
+
+            return RewriteStatement(result);
+        }
+
         protected override BoundStatement RewriteForStatement(BoundForStatement node)
         {
             // for <var> = <lower> to <upper>
@@ -158,7 +196,7 @@ namespace Minsk.CodeAnalysis.Lowering
             //      }   
             // }
 
-             var variableDeclaration = new BoundVariableDeclaration(node.Variable, node.LowerBound);
+            var variableDeclaration = new BoundVariableDeclaration(node.Variable, node.LowerBound);
             var variableExpression = new BoundVariableExpression(node.Variable);
             var upperBoundSymbol = new VariableSymbol("upperBound", true, TypeSymbol.Int);
             var upperBoundDeclaration = new BoundVariableDeclaration(upperBoundSymbol, node.UpperBound);
