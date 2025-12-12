@@ -4,6 +4,7 @@ using System.Linq;
 using Minsk.CodeAnalysis.Syntax;
 using System.Collections.Immutable;
 using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Text;
 
 namespace Minsk.CodeAnalysis.Binding
 {
@@ -175,21 +176,13 @@ namespace Minsk.CodeAnalysis.Binding
 
         private BoundExpression BindExpression(ExpressionSyntax syntax, TypeSymbol targetType)
         {
-           var result = BindExpression(syntax);
-             if (targetType != TypeSymbol.Error &&
-                result.Type != TypeSymbol.Error &&
-                result.Type != targetType)
-            {
-                _diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType);
-            }
-                
-            return result;
+            return BindConversion(syntax, targetType);
         }
 
         private BoundExpression BindCallExpression(CallExpressionSyntax syntax)
         {
            if (syntax.Arguments.Count == 1 && LookupType(syntax.IdentifierToken.Text)  is TypeSymbol type)
-                return BindConversion(type, syntax.Arguments[0]);
+                return BindConversion( syntax.Arguments[0], type);
 
             var boundArguments = ImmutableArray.CreateBuilder<BoundExpression>();
             foreach (var argument in syntax.Arguments)
@@ -224,15 +217,25 @@ namespace Minsk.CodeAnalysis.Binding
             return new BoundCallExpression(function, boundArguments.ToImmutable());
         }
 
-        private BoundExpression BindConversion(TypeSymbol type, ExpressionSyntax syntax)
+        private BoundExpression BindConversion(ExpressionSyntax syntax, TypeSymbol type)
         {
             var expression = BindExpression(syntax);
+            return BindConversion(syntax.Span,expression, type);
+        }
+
+        private BoundExpression BindConversion(TextSpan diagnosticSpan,BoundExpression expression,TypeSymbol type)
+        {
             var conversion = Conversion.Classify(expression.Type, type);
             if (!conversion.Exists)
             {
-                _diagnostics.ReportCannotConvert(syntax.Span, expression.Type, type);
+                if (expression.Type != TypeSymbol.Error && type != TypeSymbol.Error)
+                    _diagnostics.ReportCannotConvert(diagnosticSpan, expression.Type, type);
+                
                 return new BoundErrorExpression();
             }
+
+            if (conversion.IsIdentity)
+                return expression;
 
             return new BoundConversionExpression(type, expression);
         }
@@ -281,13 +284,9 @@ namespace Minsk.CodeAnalysis.Binding
             if (variable.IsReadOnly)
                 _diagnostics.ReportCannotAssign(syntax.EqualsToken.Span, name);
 
-            if (boundExpression.Type != variable.Type)
-            {
-                _diagnostics.ReportCannotConvert(syntax.Expression.Span, boundExpression.Type, variable.Type);
-                return new BoundErrorExpression();
-            }
+            var conversion = BindConversion(syntax.Expression.Span,boundExpression, variable.Type);
 
-            return new BoundAssignmentExpression(variable, boundExpression);
+            return new BoundAssignmentExpression(variable, conversion);
         }
 
         private BoundExpression BindUnaryExpression(UnaryExpressionSyntax syntax)
