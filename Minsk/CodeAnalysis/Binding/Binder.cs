@@ -148,12 +148,26 @@ namespace Minsk.CodeAnalysis.Binding
 
         private BoundStatement BindVariableDeclaration(VariableDeclarationSyntax syntax)
         {
-           
+            var type = BindTypeClause(syntax.TypeClause);
             var initializer = BindExpression(syntax.Initializer);
             var isReadOnly = syntax.Keyword.Kind == SyntaxKind.LetKeyword;
-            var variable = BindVariable(syntax.Identifier, isReadOnly, initializer.Type);
+            var variableType = type ?? initializer.Type;
+            var variable = BindVariable(syntax.Identifier, isReadOnly, variableType);
+            var convertedInitializer = BindConversion(syntax.Initializer.Span,initializer, variable.Type);
            
-            return new BoundVariableDeclaration(variable, initializer);
+            return new BoundVariableDeclaration(variable, convertedInitializer);
+        }
+
+        private TypeSymbol BindTypeClause(TypeClauseSyntax syntax)
+        {
+            if (syntax == null)
+                return null;
+            
+            var type = LookupType(syntax.Identifier.Text);
+            if (type == null)
+               _diagnostics.ReportUndefinedName(syntax.Identifier.Span, syntax.Identifier.Text);
+            
+            return type;
         }
 
         private BoundStatement BindExpressionStatement(ExpressionStatementSyntax syntax)
@@ -190,7 +204,7 @@ namespace Minsk.CodeAnalysis.Binding
         private BoundExpression BindCallExpression(CallExpressionSyntax syntax)
         {
            if (syntax.Arguments.Count == 1 && LookupType(syntax.IdentifierToken.Text)  is TypeSymbol type)
-                return BindConversion( syntax.Arguments[0], type);
+                return BindConversion( syntax.Arguments[0], type, allowExplicit: true);
 
             var boundArguments = ImmutableArray.CreateBuilder<BoundExpression>();
             foreach (var argument in syntax.Arguments)
@@ -225,13 +239,13 @@ namespace Minsk.CodeAnalysis.Binding
             return new BoundCallExpression(function, boundArguments.ToImmutable());
         }
 
-        private BoundExpression BindConversion(ExpressionSyntax syntax, TypeSymbol type)
+        private BoundExpression BindConversion(ExpressionSyntax syntax, TypeSymbol type,bool allowExplicit = false)
         {
             var expression = BindExpression(syntax);
-            return BindConversion(syntax.Span,expression, type);
+            return BindConversion(syntax.Span,expression, type,allowExplicit);
         }
 
-        private BoundExpression BindConversion(TextSpan diagnosticSpan,BoundExpression expression,TypeSymbol type)
+        private BoundExpression BindConversion(TextSpan diagnosticSpan,BoundExpression expression,TypeSymbol type, bool allowExplicit = false)
         {
             var conversion = Conversion.Classify(expression.Type, type);
             if (!conversion.Exists)
@@ -241,6 +255,9 @@ namespace Minsk.CodeAnalysis.Binding
                 
                 return new BoundErrorExpression();
             }
+
+            if (!allowExplicit && conversion.IsExplicit)
+                _diagnostics.ReportCannotConvertImplicitly(diagnosticSpan, expression.Type, type);
 
             if (conversion.IsIdentity)
                 return expression;

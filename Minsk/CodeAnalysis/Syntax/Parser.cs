@@ -77,7 +77,7 @@ namespace Minsk.CodeAnalysis.Syntax
                     return ParseBlockStatement();
                 case SyntaxKind.LetKeyword:
                 case SyntaxKind.VarKeyword:
-                    return ParseDeclarationStatement();
+                    return ParseVariableDeclaration();
                 case SyntaxKind.IfKeyword:
                     return ParseIfStatement();
                 case SyntaxKind.WhileKeyword:
@@ -119,14 +119,31 @@ namespace Minsk.CodeAnalysis.Syntax
             return new ForStatementSyntax(forKeyword, identifier, equalsToken, lowerBound, toKeyword, upperBound, body);
         }
 
-        private StatementSyntax ParseDeclarationStatement()
+        private StatementSyntax ParseVariableDeclaration()
         {
             var keyword = MatchToken(Current.Kind == SyntaxKind.LetKeyword ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
             var identifierToken = MatchToken(SyntaxKind.IdentifierToken);
+            var typeClause = ParseOptionalTypeClause();
             var equalsToken = MatchToken(SyntaxKind.EqualsToken);
             var expression = ParseExpression();
-            return new VariableDeclarationSyntax(keyword, identifierToken, equalsToken, expression);
+            return new VariableDeclarationSyntax(keyword, identifierToken,typeClause, equalsToken, expression);
         }
+
+        private TypeClauseSyntax ParseOptionalTypeClause()
+        {
+            if (Current.Kind != SyntaxKind.ColonToken)
+                return null;
+
+            return ParseTypeClause();
+        }
+
+        private TypeClauseSyntax ParseTypeClause()
+        {
+            var colonToken = MatchToken(SyntaxKind.ColonToken);
+            var identifier = MatchToken(SyntaxKind.IdentifierToken);
+            return new TypeClauseSyntax(colonToken, identifier);
+        }
+
         private BlockStatementSyntax ParseBlockStatement()
         {
             var openBraceToken = MatchToken(SyntaxKind.OpenBraceToken);

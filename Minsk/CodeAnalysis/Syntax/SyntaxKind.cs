@@ -4,6 +4,7 @@ namespace Minsk.CodeAnalysis.Syntax
     {
         // Tokens
         BadToken,
+        ColonToken,
         CommaToken,
         EndOfFileToken,
         WhitespaceToken,
@@ -55,13 +56,14 @@ namespace Minsk.CodeAnalysis.Syntax
 
         //unit
         CompilationUnit,
+        ElseClause,
+        TypeClause,
         // Statements
         DoWhileStatement,
         ExpressionStatement,
         BlockStatement,
         VariableDeclaration,
         IfStatement,
-        ElseClause,
         WhileStatement,
         ForStatement
     }

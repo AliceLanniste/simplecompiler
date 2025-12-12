@@ -270,6 +270,8 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (kind)
             {
+                case SyntaxKind.ColonToken:
+                    return ":";
                 case SyntaxKind.DoKeyword:
                     return "do";
                 case SyntaxKind.CommaToken:

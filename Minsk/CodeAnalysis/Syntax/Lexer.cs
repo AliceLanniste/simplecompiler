@@ -53,7 +53,10 @@ namespace Minsk.CodeAnalysis.Syntax
                 case '\0':
                     _kind = SyntaxKind.EndOfFileToken;
                     break;
-
+                case ':':
+                    _kind = SyntaxKind.ColonToken;
+                    _position++;
+                    break;
                 case '+':
                     _kind = SyntaxKind.PlusToken;
                     _position++;
