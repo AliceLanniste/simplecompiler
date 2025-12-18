@@ -35,6 +35,7 @@ namespace Minsk.CodeAnalysis.Syntax
         // Keywords
         DoKeyword,
         FalseKeyword,
+        FunctionKeyword,
         TrueKeyword,
         LetKeyword,
         VarKeyword,
@@ -65,7 +66,10 @@ namespace Minsk.CodeAnalysis.Syntax
         VariableDeclaration,
         IfStatement,
         WhileStatement,
-        ForStatement
+        ForStatement,
+        FunctionDeclaration,
+        GlobalStatement,
+        Parameter,
     }
 }
 
