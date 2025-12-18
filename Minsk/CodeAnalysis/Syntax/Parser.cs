@@ -119,16 +119,21 @@ namespace Minsk.CodeAnalysis.Syntax
         private SeparatedSyntaxList<ParameterSyntax> ParseParameters()
         {
             var nodesAndSeparators = ImmutableArray.CreateBuilder<SyntaxNode>();
-            while (Current.Kind != SyntaxKind.CloseParenthesisToken && Current.Kind != SyntaxKind.EndOfFileToken)
+            var parseNextParameter = true;
+            while (parseNextParameter && Current.Kind != SyntaxKind.CloseParenthesisToken && Current.Kind != SyntaxKind.EndOfFileToken)
             {
 
                 var parameter = ParseParameter();
                 nodesAndSeparators.Add(parameter);
 
-                if (Current.Kind  != SyntaxKind.CloseParenthesisToken)
+                if (Current.Kind  == SyntaxKind.CommaToken)
                 {
+
                     var commaToken = MatchToken(SyntaxKind.CommaToken);
                     nodesAndSeparators.Add(commaToken);
+                } else
+                {
+                    parseNextParameter = false;
                 }
             }
 
