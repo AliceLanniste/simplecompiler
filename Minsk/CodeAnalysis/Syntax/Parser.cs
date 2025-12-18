@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Runtime.InteropServices;
 using Minsk.CodeAnalysis.Text;
 
 namespace Minsk.CodeAnalysis.Syntax
@@ -64,11 +65,82 @@ namespace Minsk.CodeAnalysis.Syntax
 
         public CompilationUnitSyntax ParseCompilationUnit()
         {
-            var statement = ParseStatement();
+            var members = ParseMembers();
             var endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken);
-            return new CompilationUnitSyntax(statement, endOfFileToken);
+            return new CompilationUnitSyntax(members, endOfFileToken);
+        }
+
+        private ImmutableArray<MemberSyntax> ParseMembers()
+        {
+            var members = ImmutableArray.CreateBuilder<MemberSyntax>();
+            while (Current.Kind != SyntaxKind.EndOfFileToken)
+            {
+                var startToken = Current;
+                
+                var member = ParseMember();
+                members.Add(member);
+
+                if(Current == startToken)
+                    NextToken();
+            }
+
+            return members.ToImmutable();
+        }
+
+        private MemberSyntax ParseMember()
+        {
+            switch (Current.Kind)
+            {
+                case SyntaxKind.FunctionKeyword:
+                    return ParseFunctionDeclaration();
+                default:
+                    return ParseGlobalStatement();
+            }
+        }
+
+        private FunctionDeclarationSyntax ParseFunctionDeclaration()
+        {
+            var functionKeyword = MatchToken(SyntaxKind.FunctionKeyword);
+            var identifier = MatchToken(SyntaxKind.IdentifierToken);
+            var openParenthesisToken = MatchToken(SyntaxKind.OpenParenthesisToken);
+            var parameters = ParseParameters();
+            var closeParenthesisToken = MatchToken(SyntaxKind.CloseParenthesisToken);
+            var type = ParseOptionalTypeClause();
+            var body = ParseBlockStatement();
+            return new FunctionDeclarationSyntax(functionKeyword, identifier, openParenthesisToken, parameters, closeParenthesisToken, type, body);
+        }
+
+        private GlobalStatementSyntax ParseGlobalStatement()
+        {
+            var statements = ParseStatement();
+            return new GlobalStatementSyntax(statements);
         }
     
+        private SeparatedSyntaxList<ParameterSyntax> ParseParameters()
+        {
+            var nodesAndSeparators = ImmutableArray.CreateBuilder<SyntaxNode>();
+            while (Current.Kind != SyntaxKind.CloseParenthesisToken && Current.Kind != SyntaxKind.EndOfFileToken)
+            {
+
+                var parameter = ParseParameter();
+                nodesAndSeparators.Add(parameter);
+
+                if (Current.Kind  != SyntaxKind.CloseParenthesisToken)
+                {
+                    var commaToken = MatchToken(SyntaxKind.CommaToken);
+                    nodesAndSeparators.Add(commaToken);
+                }
+            }
+
+            return new SeparatedSyntaxList<ParameterSyntax>(nodesAndSeparators.ToImmutable());
+        }
+
+        private ParameterSyntax ParseParameter()
+        {
+            var identifier = MatchToken(SyntaxKind.IdentifierToken);
+            var type = ParseOptionalTypeClause();
+            return new ParameterSyntax(identifier, type);
+        }
         private StatementSyntax ParseStatement()
         {
             switch (Current.Kind)
@@ -153,7 +225,6 @@ namespace Minsk.CodeAnalysis.Syntax
                var startToken = Current;
                 var statement = ParseStatement();
                 statements.Add(statement);
-
                 if (Current == startToken)
                 {
                     NextToken();

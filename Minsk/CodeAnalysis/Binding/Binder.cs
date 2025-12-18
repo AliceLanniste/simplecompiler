@@ -5,32 +5,53 @@ using Minsk.CodeAnalysis.Syntax;
 using System.Collections.Immutable;
 using Minsk.CodeAnalysis.Symbol;
 using Minsk.CodeAnalysis.Text;
+using System.Reflection.Metadata;
+using Minsk.CodeAnalysis.Lowering;
 
 namespace Minsk.CodeAnalysis.Binding
 {
     internal sealed class Binder
     {
         private readonly DiagnosticBag _diagnostics = new DiagnosticBag();
-
+        private readonly FunctionSymbol _fuction;
         private BoundScope _scope;
 
-        public Binder( BoundScope parent)
+        public Binder( BoundScope parent, FunctionSymbol function)
         {
             _scope = new BoundScope(parent);
+            _fuction = function;
+
+            if (function != null)
+            {
+                foreach (var parameter in function.Parameters)
+                    _scope.TryDeclareVariable(parameter);
+            }
         }
 
         public static BoundGlobalScope BindGlobalScope(BoundGlobalScope previous, CompilationUnitSyntax syntax)
         {
             var parent = CreateParentScope(previous);
-            var binder = new Binder(parent);
-            var statement = binder.BindStatement(syntax.Statement);
+            var binder = new Binder(parent, function:null);
+            foreach (var function in syntax.Members.OfType<FunctionDeclarationSyntax>())
+                binder.BindFunctionDeclaration(function);
+
+            var statementBuilder = ImmutableArray.CreateBuilder<BoundStatement>();
+
+            foreach(var globalStatement in syntax.Members.OfType<GlobalStatementSyntax>())
+            {
+                var s = binder.BindStatement(globalStatement.Statement);
+                statementBuilder.Add(s);
+            }
+
+            var statement  = new BoundBlockStatement(statementBuilder.ToImmutable());
+            var functions = binder._scope.GetDeclaredFunctions();
             var variables =binder._scope.GetDeclaredVariables();
             var diagnostics = binder.Diagnostics.ToImmutableArray();
             if (previous != null)
             {
                 diagnostics = diagnostics.InsertRange(0,previous.Diagnostics);
             }
-            return new BoundGlobalScope(previous, diagnostics, variables, statement);
+            return new BoundGlobalScope(previous, diagnostics,functions, variables, statement);
         }
 
         public DiagnosticBag Diagnostics => _diagnostics;
@@ -48,7 +69,11 @@ namespace Minsk.CodeAnalysis.Binding
             while (stack.Count > 0)
             {
                 previous = stack.Pop();
-                var scope = new BoundScope(parent); 
+                var scope = new BoundScope(parent);
+
+                foreach (var f in previous.Functions)
+                    scope.TryDeclareFunction(f);
+
                 foreach (var v in previous.Variables)
                     scope.TryDeclareVariable(v);
                 parent = scope;
@@ -62,6 +87,65 @@ namespace Minsk.CodeAnalysis.Binding
             foreach (var f in BuiltinFunctions.GetAll())
                 scope.TryDeclareFunction(f);
             return scope;
+        }
+
+        public static BoundProgram BindProgram(BoundGlobalScope globalScope)
+        {
+            var parentScope = CreateParentScope(globalScope);
+            var functionBodies = ImmutableDictionary.CreateBuilder<FunctionSymbol, BoundBlockStatement>();
+            var diagnostics = new DiagnosticBag();
+
+            var scope = globalScope;
+
+            while (scope != null)
+            {
+                foreach( var function in scope.Functions)
+                {
+                    var binder = new Binder(parentScope, function);
+                    var body = binder.BindStatement(function.Declaration.Body);
+                    var loweredBody = Lowerer.Lower(body);
+                    functionBodies.Add(function, loweredBody);
+
+                    diagnostics.AddRange(binder.Diagnostics);
+                }
+                scope = scope.Previous;
+            }
+
+            return new BoundProgram(globalScope, diagnostics, functionBodies.ToImmutable());
+
+        }
+
+        private void BindFunctionDeclaration(FunctionDeclarationSyntax syntax)
+        {
+            var parameters = ImmutableArray.CreateBuilder<ParameterSymbol>();
+            var seenParameterNames = new HashSet<string>();
+            foreach (var parameterSyntax in syntax.Parameters)
+            {
+                var parameterName = parameterSyntax.Identifier.Text; 
+                var parameterType = BindTypeClause(parameterSyntax.Type);
+                if (!seenParameterNames.Add(parameterName))
+                {
+                    _diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Span, parameterName);
+                }
+                 else
+                {
+                    var parameter = new ParameterSymbol(parameterName, parameterType);
+                    parameters.Add(parameter);
+                }
+            }
+
+            var type = BindTypeClause(syntax.Type) ?? TypeSymbol.Void;
+
+            if (type != TypeSymbol.Void)
+            {
+                _diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.Type.Span);
+            }
+            var function = new FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type,syntax);
+
+            if (!_scope.TryDeclareFunction(function))
+            {
+                _diagnostics.ReportFunctionAlreadyDeclared(syntax.Identifier.Span, function.Name);
+            }
         }
         public BoundStatement BindStatement(StatementSyntax syntax)
         {
@@ -231,7 +315,7 @@ namespace Minsk.CodeAnalysis.Binding
                 var parameter = function.Parameters[i];
                 if (boundArgument.Type != parameter.Type)
                 {
-                    _diagnostics.ReportWrongArgumentType(syntax.Span, function.Name, parameter.Type, boundArgument.Type);
+                    _diagnostics.ReportWrongArgumentType(syntax.Arguments[i].Span, parameter.Name, parameter.Type, boundArgument.Type);
                     return new BoundErrorExpression();
                 }
             }
@@ -353,7 +437,10 @@ namespace Minsk.CodeAnalysis.Binding
         {
             var name = identifierToken.Text ?? "?";
             var declare = !identifierToken.IsMissing;
-            var variable = new VariableSymbol(name, isReadOnly, type);
+            var variable = _fuction == null ?
+                                      (VariableSymbol) new GlobalVariableSymbol(name,isReadOnly, type) :
+                                      new LocalVariableSymbol(name,  isReadOnly, type);
+            
             
             if (declare && !_scope.TryDeclareVariable(variable))
                 _diagnostics.ReportVariableAlreadyDeclared(identifierToken.Span, name);

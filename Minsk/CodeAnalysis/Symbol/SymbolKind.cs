@@ -3,7 +3,8 @@ namespace Minsk.CodeAnalysis.Symbol
     public enum SymbolKind
     {
         Function,
-        Variable,
+        LocalVariable,
+        GlobalVariable,
         Parameter,
         Type
     }

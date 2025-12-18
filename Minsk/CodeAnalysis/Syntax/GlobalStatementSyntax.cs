@@ -8,6 +8,6 @@ namespace  Minsk.CodeAnalysis.Syntax
         }
 
         public override SyntaxKind Kind => SyntaxKind.GlobalStatement;
-        public GlobalStatementSyntax Statement { get; }
+        public StatementSyntax Statement { get; }
     }
 }
