@@ -221,6 +221,10 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (text)
             {
+                case "break":
+                    return SyntaxKind.BreakKeyword;
+                case "continue":
+                    return SyntaxKind.ContinueKeyword;
                 case "do":
                     return SyntaxKind.DoKeyword;
                 case "else":
@@ -272,6 +276,10 @@ namespace Minsk.CodeAnalysis.Syntax
         {
             switch (kind)
             {
+                case SyntaxKind.BreakKeyword:
+                    return "break";
+                case SyntaxKind.ContinueKeyword:
+                    return "continue";
                 case SyntaxKind.ColonToken:
                     return ":";
                 case SyntaxKind.DoKeyword:

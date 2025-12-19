@@ -33,6 +33,8 @@ namespace Minsk.CodeAnalysis.Syntax
         HatToken,
         PipeToken,
         // Keywords
+        BreakKeyword,
+        ContinueKeyword,
         DoKeyword,
         FalseKeyword,
         FunctionKeyword,
@@ -60,6 +62,9 @@ namespace Minsk.CodeAnalysis.Syntax
         ElseClause,
         TypeClause,
         // Statements
+        BreakStatement,
+        ContinueStatement,
+
         DoWhileStatement,
         ExpressionStatement,
         BlockStatement,

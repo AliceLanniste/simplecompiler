@@ -149,7 +149,12 @@ namespace Minsk.CodeAnalysis.Syntax
         private StatementSyntax ParseStatement()
         {
             switch (Current.Kind)
+
             {
+                case SyntaxKind.BreakKeyword:
+                    return ParseBreakStatement();
+                case SyntaxKind.ContinueKeyword:
+                    return ParseContinueStatement();
                 case SyntaxKind.OpenBraceToken:
                     return ParseBlockStatement();
                 case SyntaxKind.LetKeyword:
@@ -167,7 +172,19 @@ namespace Minsk.CodeAnalysis.Syntax
                     return ParseExpressionStatement();
             }
         }
-       
+        
+        private StatementSyntax ParseBreakStatement()
+        {
+            var breakKeyword = MatchToken(SyntaxKind.BreakKeyword);
+            return new BreakStatementSyntax(breakKeyword);
+        }
+
+        private StatementSyntax ParseContinueStatement()
+        {
+            var continueKeyword = MatchToken(SyntaxKind.ContinueKeyword);
+            return new ContinueStatementSyntax(continueKeyword);
+        }
+
         private StatementSyntax ParseDoWhileStatement()
         {
             var doKeyword = MatchToken(SyntaxKind.DoKeyword);

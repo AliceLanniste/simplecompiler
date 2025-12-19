@@ -15,6 +15,8 @@ namespace Minsk.CodeAnalysis.Binding
         private readonly DiagnosticBag _diagnostics = new DiagnosticBag();
         private readonly FunctionSymbol _fuction;
         private BoundScope _scope;
+        private Stack<(BoundLabel BreakLabel, BoundLabel ContinueLabel)> _loopStack = new Stack<(BoundLabel BreakLabel, BoundLabel ContinueLabel)>();
+        private int _labelCounter;
 
         public Binder( BoundScope parent, FunctionSymbol function)
         {
@@ -43,7 +45,7 @@ namespace Minsk.CodeAnalysis.Binding
                 statementBuilder.Add(s);
             }
 
-            var statement  = new BoundBlockStatement(statementBuilder.ToImmutable());
+            // var statement  = new BoundBlockStatement(statementBuilder.ToImmutable());
             var functions = binder._scope.GetDeclaredFunctions();
             var variables =binder._scope.GetDeclaredVariables();
             var diagnostics = binder.Diagnostics.ToImmutableArray();
@@ -51,7 +53,7 @@ namespace Minsk.CodeAnalysis.Binding
             {
                 diagnostics = diagnostics.InsertRange(0,previous.Diagnostics);
             }
-            return new BoundGlobalScope(previous, diagnostics,functions, variables, statement);
+            return new BoundGlobalScope(previous, diagnostics,functions, variables, statementBuilder.ToImmutable());
         }
 
         public DiagnosticBag Diagnostics => _diagnostics;
@@ -93,7 +95,8 @@ namespace Minsk.CodeAnalysis.Binding
         {
             var parentScope = CreateParentScope(globalScope);
             var functionBodies = ImmutableDictionary.CreateBuilder<FunctionSymbol, BoundBlockStatement>();
-            var diagnostics = new DiagnosticBag();
+           var diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
+
 
             var scope = globalScope;
 
@@ -110,8 +113,9 @@ namespace Minsk.CodeAnalysis.Binding
                 }
                 scope = scope.Previous;
             }
+              var statement = Lowerer.Lower(new BoundBlockStatement(globalScope.Statements));
 
-            return new BoundProgram(globalScope, diagnostics, functionBodies.ToImmutable());
+            return new BoundProgram(diagnostics.ToImmutable(), functionBodies.ToImmutable(),statement);
 
         }
 
@@ -151,6 +155,10 @@ namespace Minsk.CodeAnalysis.Binding
         {
             switch (syntax.Kind)
             {
+                case SyntaxKind.BreakStatement:
+                    return BindBreakStatement((BreakStatementSyntax)syntax);
+                case SyntaxKind.ContinueStatement:
+                    return BindContinueStatement((ContinueStatementSyntax)syntax);
                 case SyntaxKind.ExpressionStatement:
                     return BindExpressionStatement((ExpressionStatementSyntax)syntax);
                 case SyntaxKind.BlockStatement:
@@ -170,11 +178,36 @@ namespace Minsk.CodeAnalysis.Binding
             }
         }
 
+        private BoundStatement BindBreakStatement(BreakStatementSyntax syntax)
+        {
+            if(_loopStack.Count == 0)
+            {
+                _diagnostics.ReportInvalidBreakOrContinue(syntax.Span, "break");
+                return  BindErrorStatement();
+            }
+
+            var breakLabel = _loopStack.Peek().BreakLabel;
+            return new BoundGotoStatement(breakLabel);
+        }
+
+        private BoundStatement BindContinueStatement(ContinueStatementSyntax syntax)
+        {
+           if(_loopStack.Count == 0)
+            {
+                _diagnostics.ReportInvalidBreakOrContinue(syntax.Span, "continue");
+                return  BindErrorStatement();
+            }
+
+            var continueLabel = _loopStack.Peek().ContinueLabel;
+            return new BoundGotoStatement(continueLabel);
+        
+        }
+
         private BoundStatement BindDoWhileStatement(DoWhileStatementSyntax syntax)
         {
             var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
-            var body = BindStatement(syntax.Body);
-            return new BoundDoWhileStatement(body, condition);
+            var body = BindLoopBody(syntax.Body, out var breakLabel, out var continueLabel);
+            return new BoundDoWhileStatement(body, condition,breakLabel, continueLabel);
         }
         private BoundExpression BindExpression(ExpressionSyntax syntax, bool canBeVoid = false)
         {
@@ -218,16 +251,29 @@ namespace Minsk.CodeAnalysis.Binding
           _scope = new BoundScope(_scope);
           var  variable = BindVariable(syntax.Identifier, true, TypeSymbol.Int);
 
-          var body = BindStatement(syntax.Body);
+          var body = BindLoopBody(syntax.Body, out var breakLabel, out var continueLabel);
           _scope = _scope.Parent;
-          return new BoundForStatement(variable, lowerBound, upperBound, body);
+          return new BoundForStatement(variable, lowerBound, upperBound, body,breakLabel, continueLabel);
        
         }
         private BoundStatement BindWhileStatement(WhileStatementSyntax syntax)
         {
             var condition = BindExpression(syntax.Condition, TypeSymbol.Bool);
-            var body = BindStatement(syntax.Body);
-            return new BoundWhileStatement(condition, body);
+            var body = BindLoopBody(syntax.Body, out var breakLabel, out var continueLabel);
+            return new BoundWhileStatement(condition, body,breakLabel, continueLabel);
+        }
+
+        private BoundStatement BindLoopBody(StatementSyntax body, out BoundLabel breakLabel, out BoundLabel continueLabel)
+        {
+          _labelCounter++;
+           breakLabel = new BoundLabel($"break{_labelCounter}");
+           continueLabel = new BoundLabel($"continue{_labelCounter}");
+
+           _loopStack.Push((breakLabel, continueLabel));
+           var boundBody = BindStatement(body);
+           _loopStack.Pop();
+           return boundBody;
+
         }
 
         private BoundStatement BindVariableDeclaration(VariableDeclarationSyntax syntax)
@@ -446,6 +492,10 @@ namespace Minsk.CodeAnalysis.Binding
                 _diagnostics.ReportVariableAlreadyDeclared(identifierToken.Span, name);
 
             return variable;
+        }
+        private BoundStatement BindErrorStatement()
+        {
+            return new BoundExpressionStatement(new BoundErrorExpression());
         }
 
         private TypeSymbol LookupType(string name)

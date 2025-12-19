@@ -55,8 +55,7 @@ namespace Minsk.CodeAnalysis
             if (program.Diagnostics.Any())
                 return new EvaluationResult(program.Diagnostics.ToImmutableArray(), null);
 
-            var statement = GetStatement();
-            var evaluator = new Evaluator(program.FunctionBodies, statement, variables);
+            var evaluator = new Evaluator(program, variables);
             var value = evaluator.Evaluate();
             return new EvaluationResult(ImmutableArray<Diagnostic>.Empty, value);
         }
@@ -64,15 +63,26 @@ namespace Minsk.CodeAnalysis
 
         public void EmitTree(TextWriter writer)
         {
-           var statement = GetStatement();
-            statement.WriteTo(writer);
+          var program = Binder.BindProgram(GlobalScope);
+
+          if (program.Statement.Statements.Any())
+            {
+                program.Statement.WriteTo(writer);
+            }
+            else
+            {
+                foreach (var functionBody in program.FunctionBodies)
+                {
+                    if (!GlobalScope.Functions.Contains(functionBody.Key))
+                        continue;
+
+                    functionBody.Key.WriteTo(writer);
+                    functionBody.Value.WriteTo(writer);
+                }
+            }
         }
 
-        private BoundBlockStatement GetStatement()
-        {
-            var statement = GlobalScope.Statement;
-            return Lowerer.Lower(statement);
-        }
+       
     }
 }
 
