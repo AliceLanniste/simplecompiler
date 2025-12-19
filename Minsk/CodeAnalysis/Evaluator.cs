@@ -23,6 +23,7 @@ namespace Minsk.CodeAnalysis
              _functionBodies = functionBodies;
             _root = root;
             _globals = variables;
+            _locals.Push(new Dictionary<VariableSymbol, object>());
         }
 
         public object Evaluate()
@@ -266,7 +267,8 @@ namespace Minsk.CodeAnalysis
             if (variable.Kind == SymbolKind.GlobalVariable)
             {
                 _globals[variable] = value;
-            } else
+            } 
+            else
             {
                 var locals = _locals.Peek();
                 locals[variable] = value;

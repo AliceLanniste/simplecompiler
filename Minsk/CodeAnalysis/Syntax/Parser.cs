@@ -373,16 +373,21 @@ namespace Minsk.CodeAnalysis.Syntax
         private SeparatedSyntaxList<ExpressionSyntax> ParseArguments()
         {
             var nodeAndSeparators = ImmutableArray.CreateBuilder<SyntaxNode>();
-            while(Current.Kind != SyntaxKind.CloseParenthesisToken 
+            var parseNextArgument = true;
+            while( parseNextArgument && 
+                Current.Kind != SyntaxKind.CloseParenthesisToken 
                  && Current.Kind != SyntaxKind.EndOfFileToken)
             {
                 var expression = ParseExpression();
                 nodeAndSeparators.Add(expression);
 
-                if (Current.Kind != SyntaxKind.CloseParenthesisToken)
+                if (Current.Kind == SyntaxKind.CommaToken)
                 {
                     var comma = MatchToken(SyntaxKind.CommaToken);
                     nodeAndSeparators.Add(comma);
+                } else
+                {
+                    parseNextArgument = false;
                 }
             }
 
