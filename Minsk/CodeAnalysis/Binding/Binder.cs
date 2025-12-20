@@ -45,7 +45,6 @@ namespace Minsk.CodeAnalysis.Binding
                 statementBuilder.Add(s);
             }
 
-            // var statement  = new BoundBlockStatement(statementBuilder.ToImmutable());
             var functions = binder._scope.GetDeclaredFunctions();
             var variables =binder._scope.GetDeclaredVariables();
             var diagnostics = binder.Diagnostics.ToImmutableArray();

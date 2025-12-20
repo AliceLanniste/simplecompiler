@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using Minsk.CodeAnalysis.Syntax;
 using Minsk.IO;
 
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     internal static class SymbolPrinter
     {
@@ -11,7 +12,7 @@ namespace Minsk.CodeAnalysis.Symbol
             switch (symbol.Kind)
             {
                 case SymbolKind.Function:
-                    writeFunctionTo((FunctionSymbol)symbol, writer);
+                    WriteFunctionTo((FunctionSymbol)symbol, writer);
                     break;
                 case SymbolKind.GlobalVariable:
                     WriteGlobalVariableTo((GlobalVariableSymbol)symbol, writer);
@@ -28,48 +29,55 @@ namespace Minsk.CodeAnalysis.Symbol
                 default:
                     throw new Exception($"Unexpected symbol: {symbol.Kind}");
             }
-
-            
         }
 
-        private static void writeFunctionTo(FunctionSymbol symbol, TextWriter writer)
-            {
-                writer.WriteKeyword("function");
-                writer.WriteIdentifier(symbol.Name);
-                writer.WritePunctuation("(");
+        private static void WriteFunctionTo(FunctionSymbol symbol, TextWriter writer)
+        {
+            writer.WriteKeyword(SyntaxKind.FunctionKeyword);
+            writer.WriteSpace();
+            writer.WriteIdentifier(symbol.Name);
+            writer.WritePunctuation(SyntaxKind.OpenParenthesisToken);
 
-                for(int i = 0; i < symbol.Parameters.Length; i++)
+            for (int i = 0; i < symbol.Parameters.Length; i++)
+            {
+                if (i > 0)
                 {
-                    if (i > 0)
-                        writer.WritePunctuation(", ");
-                    
-                    symbol.Parameters[i].WriteTo(writer);
+                    writer.WritePunctuation(SyntaxKind.CommaToken);
+                    writer.WriteSpace();
                 }
 
-                writer.WritePunctuation(")");
-                writer.WriteLine();
+                symbol.Parameters[i].WriteTo(writer);
             }
 
-            private static void WriteGlobalVariableTo(GlobalVariableSymbol symbol, TextWriter writer)
-            {
-               writer.WriteKeyword(symbol.IsReadOnly ? "let" : "var");
-               writer.WriteIdentifier(symbol.Name);
-               writer.WritePunctuation(": ");
-               symbol.Type.WriteTo(writer);
-            }
+            writer.WritePunctuation(SyntaxKind.CloseParenthesisToken);
+            writer.WriteLine();
+        }
 
-            private static void WriteLocalVariableTo(LocalVariableSymbol symbol, TextWriter writer)
-            {
-                writer.WriteKeyword(symbol.IsReadOnly ? "let " : "var ");
-                writer.WriteIdentifier(symbol.Name);
-                writer.WritePunctuation(": ");
-                symbol.Type.WriteTo(writer);
-            }
+        private static void WriteGlobalVariableTo(GlobalVariableSymbol symbol, TextWriter writer)
+        {
+            writer.WriteKeyword(symbol.IsReadOnly ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
+            writer.WriteSpace();
+            writer.WriteIdentifier(symbol.Name);
+            writer.WritePunctuation(SyntaxKind.ColonToken);
+            writer.WriteSpace();
+            symbol.Type.WriteTo(writer);
+        }
+
+        private static void WriteLocalVariableTo(LocalVariableSymbol symbol, TextWriter writer)
+        {
+            writer.WriteKeyword(symbol.IsReadOnly ? SyntaxKind.LetKeyword : SyntaxKind.VarKeyword);
+            writer.WriteSpace();
+            writer.WriteIdentifier(symbol.Name);
+            writer.WritePunctuation(SyntaxKind.ColonToken);
+            writer.WriteSpace();
+            symbol.Type.WriteTo(writer);
+        }
 
         private static void WriteParameterTo(ParameterSymbol symbol, TextWriter writer)
         {
             writer.WriteIdentifier(symbol.Name);
-            writer.WritePunctuation(": ");
+            writer.WritePunctuation(SyntaxKind.ColonToken);
+            writer.WriteSpace();
             symbol.Type.WriteTo(writer);
         }
 
