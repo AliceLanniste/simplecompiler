@@ -168,9 +168,23 @@ namespace Minsk.CodeAnalysis.Syntax
                     return ParseForStatement();
                 case SyntaxKind.DoKeyword:
                     return ParseDoWhileStatement();
+                case SyntaxKind.ReturnKeyword:
+                    return ParseReturnStatement();
                 default:
                     return ParseExpressionStatement();
             }
+        }
+
+        private StatementSyntax ParseReturnStatement()
+        {   
+            //return expression;
+            //return;
+            var returnKeyword = MatchToken(SyntaxKind.ReturnKeyword);
+            var keywordLine = _text.GetLineIndex(returnKeyword.Span.Start);
+            var CurrentLine = _text.GetLineIndex(Current.Span.Start);
+            var sameLine = keywordLine == CurrentLine;
+            var expression = sameLine ? ParseExpression(): null;
+            return new ReturnStatementSyntax(returnKeyword, expression);
         }
         
         private StatementSyntax ParseBreakStatement()

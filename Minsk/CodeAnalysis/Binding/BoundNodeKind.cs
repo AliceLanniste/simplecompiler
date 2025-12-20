@@ -21,6 +21,8 @@ namespace Minsk.CodeAnalysis.Binding
         ForStatement,
         LabelStatement,
         GotoStatement,
+
+        ReturnStatement,
         ConditionalGotoStatement,
     
     }

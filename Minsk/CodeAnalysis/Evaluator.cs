@@ -72,6 +72,10 @@ namespace Minsk.CodeAnalysis
                     case BoundNodeKind.LabelStatement:
                         index++;
                         break;
+                    case BoundNodeKind.ReturnStatement:
+                         var rs = (BoundReturnStatement)s;
+                         _lastValue = rs.Expression != null ? EvaluateExpression(rs.Expression): null;
+                         return _lastValue;
                     default:
                         throw new Exception($"Unexpected node {s.Kind}");
                 }

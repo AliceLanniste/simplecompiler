@@ -13,7 +13,7 @@ namespace Minsk.CodeAnalysis.Binding
     internal sealed class Binder
     {
         private readonly DiagnosticBag _diagnostics = new DiagnosticBag();
-        private readonly FunctionSymbol _fuction;
+        private readonly FunctionSymbol _function;
         private BoundScope _scope;
         private Stack<(BoundLabel BreakLabel, BoundLabel ContinueLabel)> _loopStack = new Stack<(BoundLabel BreakLabel, BoundLabel ContinueLabel)>();
         private int _labelCounter;
@@ -21,7 +21,7 @@ namespace Minsk.CodeAnalysis.Binding
         public Binder( BoundScope parent, FunctionSymbol function)
         {
             _scope = new BoundScope(parent);
-            _fuction = function;
+            _function = function;
 
             if (function != null)
             {
@@ -139,10 +139,6 @@ namespace Minsk.CodeAnalysis.Binding
 
             var type = BindTypeClause(syntax.Type) ?? TypeSymbol.Void;
 
-            if (type != TypeSymbol.Void)
-            {
-                _diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.Type.Span);
-            }
             var function = new FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type,syntax);
 
             if (!_scope.TryDeclareFunction(function))
@@ -172,9 +168,39 @@ namespace Minsk.CodeAnalysis.Binding
                     return BindForStatement((ForStatementSyntax)syntax);
                 case SyntaxKind.DoWhileStatement:
                     return BindDoWhileStatement((DoWhileStatementSyntax)syntax);
+                case SyntaxKind.ReturnStatement:
+                    return BindReturnStatement((ReturnStatementSyntax)syntax);
                 default:
                     throw new Exception($"Unexpected syntax {syntax.Kind}");
             }
+        }
+
+        private BoundStatement BindReturnStatement(ReturnStatementSyntax syntax)
+        {
+            var expression = syntax.Expression != null ? BindExpression(syntax.Expression) : null;
+
+            if (_function == null)
+            {
+                _diagnostics.ReportInvalidReturn(syntax.Span);
+            }
+            else
+            {
+                if(_function.Type == TypeSymbol.Void)
+                {
+                    if(expression != null)
+                    {
+                        _diagnostics.ReportInvalidReturnExpression(syntax.Span, _function.Name);
+                    }
+                    
+                }else
+                {
+                    if(expression == null)
+                         _diagnostics.ReportMissingReturnExpression(syntax.Span, _function.Type);
+                    else
+                        expression = BindConversion(syntax.Expression.Span, expression, _function.Type);
+                }
+            }
+            return new BoundReturnStatement(expression);
         }
 
         private BoundStatement BindBreakStatement(BreakStatementSyntax syntax)
@@ -482,7 +508,7 @@ namespace Minsk.CodeAnalysis.Binding
         {
             var name = identifierToken.Text ?? "?";
             var declare = !identifierToken.IsMissing;
-            var variable = _fuction == null ?
+            var variable = _function == null ?
                                       (VariableSymbol) new GlobalVariableSymbol(name,isReadOnly, type) :
                                       new LocalVariableSymbol(name,  isReadOnly, type);
             

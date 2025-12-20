@@ -47,6 +47,7 @@ namespace Minsk.CodeAnalysis.Syntax
         ForKeyword,
         StringToken,
         ToKeyword,
+        ReturnKeyword,
 
         // Expressions
         CallExpression,
@@ -74,6 +75,7 @@ namespace Minsk.CodeAnalysis.Syntax
         ForStatement,
         FunctionDeclaration,
         GlobalStatement,
+        ReturnStatement,
         Parameter,
     }
 }
