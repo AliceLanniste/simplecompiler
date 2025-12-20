@@ -75,6 +75,9 @@ namespace Minsk.CodeAnalysis.Binding
                 case BoundNodeKind.ConversionExpression:
                     WriteConversionExpression((BoundConversionExpression)node, writer);
                     break;
+                case BoundNodeKind.ReturnStatement:
+                    WriteReturnStatement((BoundReturnStatement)node, writer);
+                    break;
                 default:
                     throw new Exception($"Unexpected node {node.Kind}");
             }

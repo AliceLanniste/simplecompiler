@@ -165,5 +165,12 @@ namespace Minsk.CodeAnalysis
             Report(span, message);
         }
 
+        public void ReportAllPathsMustReturn(TextSpan span)
+        {
+            var message = "Not all code paths return a value.";
+            Report(span, message);
+        }
+
+
     }
 }
