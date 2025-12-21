@@ -181,8 +181,9 @@ namespace Minsk.CodeAnalysis.Syntax
             //return;
             var returnKeyword = MatchToken(SyntaxKind.ReturnKeyword);
             var keywordLine = _text.GetLineIndex(returnKeyword.Span.Start);
-            var CurrentLine = _text.GetLineIndex(Current.Span.Start);
-            var sameLine = keywordLine == CurrentLine;
+            var currentLine = _text.GetLineIndex(Current.Span.Start);
+            var isEof = Current.Kind == SyntaxKind.EndOfFileToken;
+            var sameLine = !isEof && keywordLine == currentLine;
             var expression = sameLine ? ParseExpression(): null;
             return new ReturnStatementSyntax(returnKeyword, expression);
         }

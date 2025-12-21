@@ -145,7 +145,7 @@ namespace Minsk.CodeAnalysis.Binding
 
             var function = new FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable(), type,syntax);
 
-            if (!_scope.TryDeclareFunction(function))
+            if (function.Declaration.Identifier.Text != null && !_scope.TryDeclareFunction(function))
             {
                 _diagnostics.ReportFunctionAlreadyDeclared(syntax.Identifier.Span, function.Name);
             }
@@ -193,7 +193,7 @@ namespace Minsk.CodeAnalysis.Binding
                 {
                     if(expression != null)
                     {
-                        _diagnostics.ReportInvalidReturnExpression(syntax.Span, _function.Name);
+                        _diagnostics.ReportInvalidReturnExpression(syntax.Expression.Span, _function.Name);
                     }
                     
                 }else
@@ -324,7 +324,7 @@ namespace Minsk.CodeAnalysis.Binding
             
             var type = LookupType(syntax.Identifier.Text);
             if (type == null)
-               _diagnostics.ReportUndefinedName(syntax.Identifier.Span, syntax.Identifier.Text);
+               _diagnostics.ReportUndefinedType(syntax.Identifier.Span, syntax.Identifier.Text);
             
             return type;
         }
