@@ -9,6 +9,7 @@ namespace Minsk.CodeAnalysis.Syntax
 {
     internal sealed class Lexer
     {
+        private readonly SyntaxTree _syntaxTree;
         private readonly SourceText _text;
         private int _position;
         private DiagnosticBag _diagnostics = new DiagnosticBag();
@@ -17,9 +18,10 @@ namespace Minsk.CodeAnalysis.Syntax
         private object _value;
 
         private SyntaxKind _kind;
-        public Lexer(SourceText text)
+        public Lexer(SyntaxTree syntaxTree)
         {
-            _text = text;
+            _syntaxTree = syntaxTree;
+            _text = syntaxTree.Text;
         }
 
         public DiagnosticBag Diagnostics => _diagnostics;
@@ -199,7 +201,9 @@ namespace Minsk.CodeAnalysis.Syntax
                     }
                     else
                     {
-                        _diagnostics.ReportBadCharacter(_position, Current);
+                        var span = new TextSpan(_position, 1);
+                        var location = new TextLocation(_text, span);
+                        _diagnostics.ReportBadCharacter(location, Current);
                         _position++;
                     }
                     break;
@@ -211,7 +215,7 @@ namespace Minsk.CodeAnalysis.Syntax
                 text = _text.ToString(_start, length);
          
 
-            return new SyntaxToken(_kind, _start, text, _value);
+            return new SyntaxToken(_syntaxTree, _kind, _start, text, _value);
         }
 
         private void ReadStringToken()
@@ -228,7 +232,8 @@ namespace Minsk.CodeAnalysis.Syntax
                     case '\n':
                     case '\r':
                         var span = new TextSpan(_start, 1);
-                        _diagnostics.ReportUnterminatedString(span);
+                        var location = new TextLocation(_text, span);
+                        _diagnostics.ReportUnterminatedString(location);
                         done = true;
                         break;
                     case '"': 
@@ -259,7 +264,12 @@ namespace Minsk.CodeAnalysis.Syntax
             var length = _position - _start;
             var text = _text.ToString(_start, length);
             if (!int.TryParse(text, out var value))
-                _diagnostics.ReportInvalidNumber(new TextSpan(_start, length), text, TypeSymbol.Int);
+            {
+                var span = new TextSpan(_start, length);
+                var location = new TextLocation(_text, span);
+                _diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Int);
+
+            }
             _kind = SyntaxKind.NumberToken;
             _value = value;
          

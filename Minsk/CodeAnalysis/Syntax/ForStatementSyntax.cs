@@ -2,10 +2,13 @@ namespace Minsk.CodeAnalysis.Syntax
 {
     public sealed class ForStatementSyntax: StatementSyntax
     {
-        public ForStatementSyntax(SyntaxToken keyword,SyntaxToken identifier, 
+        public ForStatementSyntax(
+            SyntaxTree syntaxTree,
+            SyntaxToken keyword,SyntaxToken identifier, 
             SyntaxToken equalsToken, ExpressionSyntax lowerBound, SyntaxToken toKeyword,
              ExpressionSyntax upperBound,
             StatementSyntax body)
+            : base(syntaxTree)
         {
             keyword =keyword;
             Identifier = identifier;

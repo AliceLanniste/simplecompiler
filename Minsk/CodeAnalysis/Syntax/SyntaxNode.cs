@@ -7,6 +7,11 @@ namespace Minsk.CodeAnalysis.Syntax
 {
    public abstract class SyntaxNode
     {
+        public SyntaxNode(SyntaxTree syntaxTree)
+        {
+            SyntaxTree = syntaxTree;
+        }
+        public SyntaxTree SyntaxTree { get; }
         public abstract SyntaxKind Kind { get; }
 
         public virtual TextSpan Span
@@ -19,6 +24,8 @@ namespace Minsk.CodeAnalysis.Syntax
             }
         }
 
+        
+        public TextLocation Location => new TextLocation(SyntaxTree.Text, Span);
         public SyntaxToken GetLastToken()
         {
             if (this is SyntaxToken token)

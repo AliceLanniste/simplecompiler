@@ -5,11 +5,19 @@ namespace Minsk.CodeAnalysis.Text
     public sealed class SourceText
     {
         private readonly string _text;
-        private SourceText(string text)
+        private SourceText(string text, string filename)
         {
             _text = text;
+            FileName = filename;
             Lines = ParseLines(this, text);
         }
+
+        public static SourceText From(string text, string filename="")
+        {
+            return new SourceText(text, filename);
+        }
+
+        public string FileName { get; }
 
         public char this[int index] => _text[index];
         public int Length => _text.Length;
@@ -105,10 +113,6 @@ namespace Minsk.CodeAnalysis.Text
                 return 0;
             }
 
-        }
-        public static SourceText From(string text)
-        {
-            return new SourceText(text);
         }
 
       public override string ToString() => _text;

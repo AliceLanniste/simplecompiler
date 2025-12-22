@@ -5,7 +5,10 @@ namespace Minsk.CodeAnalysis.Syntax
 {
     public sealed class CallExpressionSyntax: ExpressionSyntax
     {
-        public CallExpressionSyntax(SyntaxToken identifierToken, SyntaxToken openParenthesisToken, SeparatedSyntaxList<ExpressionSyntax> arguments, SyntaxToken closeParenthesisToken)
+        public CallExpressionSyntax(
+            SyntaxTree syntaxTree,
+            SyntaxToken identifierToken, SyntaxToken openParenthesisToken, SeparatedSyntaxList<ExpressionSyntax> arguments, SyntaxToken closeParenthesisToken)
+        : base(syntaxTree)
         {
             IdentifierToken = identifierToken;
             OpenParenthesisToken = openParenthesisToken;

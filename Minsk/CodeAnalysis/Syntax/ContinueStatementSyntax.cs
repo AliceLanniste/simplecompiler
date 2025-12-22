@@ -5,7 +5,10 @@ namespace Minsk.CodeAnalysis.Syntax
 {
     public sealed class ContinueStatementSyntax: StatementSyntax
     {
-        public ContinueStatementSyntax(SyntaxToken continueKeyword)
+        public ContinueStatementSyntax(
+            SyntaxTree syntaxTree,
+            SyntaxToken continueKeyword)
+            : base(syntaxTree)
         {
             ContinueKeyword = continueKeyword;
         }

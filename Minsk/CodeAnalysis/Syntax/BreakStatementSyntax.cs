@@ -5,7 +5,8 @@ namespace Minsk.CodeAnalysis.Syntax
 {
     public sealed class BreakStatementSyntax: StatementSyntax
     {
-        public BreakStatementSyntax(SyntaxToken breakKeyword)
+        public BreakStatementSyntax(SyntaxTree syntaxTree, SyntaxToken breakKeyword)
+        : base(syntaxTree)
         {
             BreakKeyword = breakKeyword;
         }
