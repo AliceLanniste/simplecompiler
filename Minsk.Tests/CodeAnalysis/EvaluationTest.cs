@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Syntax;
-using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Symbols;
 using Xunit;
 
 namespace Minsk.Tests.CodeAnalysis

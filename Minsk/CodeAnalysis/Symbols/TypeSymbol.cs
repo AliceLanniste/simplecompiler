@@ -1,4 +1,4 @@
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     public sealed class TypeSymbol:Symbol
     {

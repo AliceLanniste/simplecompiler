@@ -3,7 +3,7 @@ using System.IO;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.IO;
 
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     internal static class SymbolPrinter
     {

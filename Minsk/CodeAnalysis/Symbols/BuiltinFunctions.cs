@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     public sealed class  BuiltinFunctions
     {

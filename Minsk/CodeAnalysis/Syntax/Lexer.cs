@@ -3,7 +3,7 @@ using System.Text;
 
 using System.Collections.Generic;
 using Minsk.CodeAnalysis.Text;
-using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Symbols;
 
 namespace Minsk.CodeAnalysis.Syntax
 {

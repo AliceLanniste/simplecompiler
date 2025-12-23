@@ -5,7 +5,7 @@ using System.Linq;
 using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis.Lowering; 
-using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Symbols;
 
 namespace Minsk.CodeAnalysis
 {
@@ -43,6 +43,33 @@ namespace Minsk.CodeAnalysis
         }
         public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
         public Compilation Previous { get; }
+
+        public ImmutableArray<FunctionSymbol> Functions => GlobalScope.Functions;
+        public ImmutableArray<VariableSymbol> Variables => GlobalScope.Variables;
+
+        public IEnumerable<Symbol> GetSymbols()
+        {
+            var submission = this;
+            var seenSymbolNames = new HashSet<string>();
+
+            while (submission != null)
+            {
+                foreach (var function in submission.Functions)
+                {
+                    if (seenSymbolNames.Add(function.Name))
+                        yield return function;
+
+                }
+
+                foreach (var variable in submission.Variables)
+                {
+                    if (seenSymbolNames.Add(variable.Name))
+                        yield return variable;
+                }
+
+                submission = submission.Previous;
+            }
+        }
 
         public EvaluationResult Evaluate(Dictionary<VariableSymbol, object> variables)
         {
@@ -95,6 +122,16 @@ namespace Minsk.CodeAnalysis
             }
         }
 
+        public void EmitTree(FunctionSymbol symbol, TextWriter writer)
+        {
+            var program = Binder.BindProgram(GlobalScope);
+           if (!program.FunctionBodies.TryGetValue(symbol, out var functionBody))   
+                 return;
+
+            symbol.WriteTo(writer);
+            writer.WriteLine();
+            functionBody.WriteTo(writer);
+        }
        
     }
 }

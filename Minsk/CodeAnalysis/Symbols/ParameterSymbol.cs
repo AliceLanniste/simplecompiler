@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using System.Reflection.Metadata;
 
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     public sealed class ParameterSymbol:LocalVariableSymbol
     {

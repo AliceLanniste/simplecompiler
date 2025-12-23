@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Linq;
 using System.Reflection;
+using Minsk.IO;
 
 namespace Minsk
 {
@@ -528,8 +529,14 @@ namespace Minsk
             var maxNameLength = _metaCommands.Max(m => m.Name.Length);
             foreach(var metaCommand in _metaCommands.OrderBy(mc=>mc.Name))
             {
-                 var paddedName = metaCommand.Name.PadRight(maxNameLength);
-                Console.WriteLine($"#{paddedName}  {metaCommand.Description}");
+                var paddedName = metaCommand.Name.PadRight(maxNameLength);
+                Console.Out.WritePunctuation("#");
+                Console.Out.WriteIdentifier(paddedName);
+                Console.Out.WriteSpace();
+                Console.Out.WriteSpace();
+                Console.Out.WriteSpace();
+                Console.Out.WritePunctuation(metaCommand.Description);
+                Console.Out.WriteLine();
             }
         }
         

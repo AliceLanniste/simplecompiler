@@ -1,7 +1,7 @@
 using System.Collections.Immutable;
 using Minsk.CodeAnalysis.Syntax;
 
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     public sealed class FunctionSymbol:Symbol
     {

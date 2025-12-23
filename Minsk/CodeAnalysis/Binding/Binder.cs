@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Minsk.CodeAnalysis.Syntax;
 using System.Collections.Immutable;
-using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Text;
 using System.Reflection.Metadata;
 using Minsk.CodeAnalysis.Lowering;

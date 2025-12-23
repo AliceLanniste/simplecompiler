@@ -1,4 +1,4 @@
-namespace Minsk.CodeAnalysis.Symbol
+namespace Minsk.CodeAnalysis.Symbols
 {
     public abstract  class VariableSymbol:Symbol
     {

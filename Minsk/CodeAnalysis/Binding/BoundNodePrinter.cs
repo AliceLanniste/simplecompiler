@@ -1,7 +1,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.IO;
-using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.IO;
 
