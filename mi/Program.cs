@@ -25,17 +25,27 @@ namespace Minsk
                 return;
             }
 
-            var path = args.Single();
+            var paths = GetFilePaths(args);
+            var syntaxTrees = new List<SyntaxTree>();
+            var hasErrors = false;
 
-            if (!File.Exists(path))
+            foreach (var path in paths)
             {
-                Console.Error.WriteLine($"Error: File '{path}' does not exist");
-                return;
+                if (!File.Exists(path))
+                {
+                    Console.Error.WriteLine($"Error: File '{path}' does not exist");
+                    hasErrors = true;
+                    continue;
+                }
+                    var syntaxTree = SyntaxTree.Load(path);
+                    syntaxTrees.Add(syntaxTree);
             }
 
+            if (hasErrors)
+                return;
+            
 
-            var syntaxTree = SyntaxTree.Load(path);
-            var compilation = new Compilation(syntaxTree);
+            var compilation = new Compilation(syntaxTrees.ToArray());
             var result = compilation.Evaluate(new Dictionary<VariableSymbol, object>());
 
             if (!result.Diagnostics.Any())
@@ -50,6 +60,26 @@ namespace Minsk
             
             }
         }
-    }
+    
 
-}   
+        private static IEnumerable<string> GetFilePaths(IEnumerable<string> paths)
+        {
+            var result = new SortedSet<string>();
+
+            foreach( var path in paths)
+            {
+                if (Directory.Exists(path))
+                {
+                    result.UnionWith(Directory.EnumerateFiles(path, "*.ms", SearchOption.AllDirectories));
+                }
+                else
+                {
+                    result.Add(path);
+                }
+             }
+            return result;
+            }
+
+        }
+}
+
