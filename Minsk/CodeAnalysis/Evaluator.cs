@@ -9,7 +9,8 @@ namespace Minsk.CodeAnalysis
     internal sealed class Evaluator
     {
         private readonly BoundProgram _program;
-        private readonly ImmutableDictionary<FunctionSymbol, BoundBlockStatement> _functionBodies;
+        private readonly Dictionary<FunctionSymbol, BoundBlockStatement> _functionBodies = 
+                                new Dictionary<FunctionSymbol, BoundBlockStatement>();
         private readonly BoundBlockStatement _root;
         private readonly Dictionary<VariableSymbol, object> _globals;
 
@@ -24,6 +25,16 @@ namespace Minsk.CodeAnalysis
             _program = program;
             _globals = variables;
             _locals.Push(new Dictionary<VariableSymbol, object>());
+
+            var current = program;
+            while (current != null)
+            {
+                foreach(var function in current.FunctionBodies)
+                {
+                    _functionBodies.Add(function.Key, function.Value);
+                }
+                current = current.Previous;
+            }
         }
 
         public object Evaluate()
@@ -149,7 +160,7 @@ namespace Minsk.CodeAnalysis
                 }    
                 _locals.Push(locals);
 
-                var statement = _program.FunctionBodies[node.Function];
+                var statement = _functionBodies[node.Function];
                 var result = EvaluateStatement(statement);
                 return result;
 

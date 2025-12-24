@@ -99,7 +99,7 @@ namespace Minsk
 
                     Console.ResetColor();
                     _lineRenderer(line);
-                    Console.WriteLine(new string(' ', Console.WindowWidth - line.Length));
+                    Console.Write(new string(' ', Console.WindowWidth - line.Length));
                     lineCount++;
                 }
 

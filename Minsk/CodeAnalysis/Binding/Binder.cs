@@ -93,8 +93,7 @@ namespace Minsk.CodeAnalysis.Binding
                 scope.TryDeclareFunction(f);
             return scope;
         }
-
-        public static BoundProgram BindProgram(BoundGlobalScope globalScope)
+        public static BoundProgram BindProgram(BoundProgram previous, BoundGlobalScope globalScope)
         {
             var parentScope = CreateParentScope(globalScope);
             var functionBodies = ImmutableDictionary.CreateBuilder<FunctionSymbol, BoundBlockStatement>();
@@ -103,9 +102,7 @@ namespace Minsk.CodeAnalysis.Binding
 
             var scope = globalScope;
 
-            while (scope != null)
-            {
-                foreach( var function in scope.Functions)
+                foreach( var function in globalScope.Functions)
                 {
                     var binder = new Binder(parentScope, function);
                     var body = binder.BindStatement(function.Declaration.Body);
@@ -118,11 +115,10 @@ namespace Minsk.CodeAnalysis.Binding
 
                     diagnostics.AddRange(binder.Diagnostics);
                 }
-                scope = scope.Previous;
-            }
+            
               var statement = Lowerer.Lower(new BoundBlockStatement(globalScope.Statements));
 
-            return new BoundProgram(diagnostics.ToImmutable(), functionBodies.ToImmutable(),statement);
+            return new BoundProgram(previous,diagnostics.ToImmutable(), functionBodies.ToImmutable(),statement);
 
         }
 
