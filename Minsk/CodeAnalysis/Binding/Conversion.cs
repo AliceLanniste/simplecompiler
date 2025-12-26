@@ -31,6 +31,15 @@ namespace Minsk.CodeAnalysis.Binding
                     return Conversion.Explicit;
             }
 
+            if (from != TypeSymbol.Void && to == TypeSymbol.Any)
+            {
+                return Conversion.Implicit;
+            }
+            if (from == TypeSymbol.Any && to != TypeSymbol.Void)
+            {
+                return Conversion.Explicit;
+            }
+
             if (from == TypeSymbol.String)
             {
                 if (to == TypeSymbol.Bool || to == TypeSymbol.Int)

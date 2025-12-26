@@ -5,17 +5,20 @@ namespace Minsk.CodeAnalysis.Binding
 {
     internal sealed class BoundProgram
     {
-        public BoundProgram(BoundProgram previous, ImmutableArray<Diagnostic> diagnostics, ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functionBodies, BoundBlockStatement statement)
+        public BoundProgram(BoundProgram previous, ImmutableArray<Diagnostic> diagnostics,     FunctionSymbol mainFunction,
+                            FunctionSymbol scriptFunction,ImmutableDictionary<FunctionSymbol, BoundBlockStatement> functionBodies)
         {
            Previous = previous;
             Diagnostics = diagnostics;
+            MainFunction = mainFunction;
+            ScriptFunction = scriptFunction;
             FunctionBodies = functionBodies;
-            Statement = statement;
         }
 
          public BoundProgram Previous { get; }
         public ImmutableArray<Diagnostic> Diagnostics { get; }
+        public FunctionSymbol MainFunction { get; }
+        public FunctionSymbol ScriptFunction { get; }
         public ImmutableDictionary<FunctionSymbol, BoundBlockStatement> FunctionBodies { get; }
-        public BoundBlockStatement Statement { get; }
     }
 }

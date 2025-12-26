@@ -11,6 +11,7 @@ namespace Minsk
 {
     internal sealed class MinskRepl : Repl
     {
+        private static readonly Compilation emptyCompilation = Compilation.CreateScript(null);
         private static bool _loadingSubmission;
         private Compilation _previous;
         private bool _showTree;
@@ -152,9 +153,7 @@ namespace Minsk
         {
             var syntaxTree = SyntaxTree.Parse(text);
 
-            var compilation = _previous == null
-                                ? new Compilation(syntaxTree)
-                                : _previous.ContinueWith(syntaxTree);
+            var compilation = Compilation.CreateScript(_previous, syntaxTree);  
 
             if (_showTree)
                 syntaxTree.Root.WriteTo(Console.Out);
@@ -216,7 +215,9 @@ namespace Minsk
 
         private static void ClearSubmissions()
         {
-            Directory.Delete(GetSubmissionsDirectory(), recursive: true);
+            var dir = GetSubmissionsDirectory();
+            if (Directory.Exists(dir))
+                Directory.Delete(dir, recursive: true);
         }
 
         private static void SaveSubmission(string text)

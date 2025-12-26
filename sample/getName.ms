@@ -4,3 +4,5 @@ function getName(): string
     let name = input()
     return name
 }
+
+print("Hello ")

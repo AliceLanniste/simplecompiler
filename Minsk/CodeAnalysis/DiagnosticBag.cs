@@ -62,9 +62,27 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-        public void ReportUndefinedName(TextLocation location, string name)
+        public void ReportParameterAlreadyDeclared(TextLocation location, string parameterName)
+        {
+            var message = $"A parameter with the name '{parameterName}' already exists.";
+            Report(location, message);
+        }
+
+        public void ReportUndefinedVariable(TextLocation location, string name)
         {
             var message = $"Variable '{name}' doesn't exist.";
+            Report(location, message);
+        }
+
+        public void ReportNotAVariable(TextLocation location, string name)
+        {
+            var message = $"'{name}' is not a variable.";
+            Report(location, message);
+        }
+
+        public void ReportUndefinedType(TextLocation location, string name)
+        {
+            var message = $"Type '{name}' doesn't exist.";
             Report(location, message);
         }
 
@@ -74,15 +92,15 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-        public void ReportVariableAlreadyDeclared(TextLocation location, string name)
+        public void ReportCannotConvertImplicitly(TextLocation location, TypeSymbol fromType, TypeSymbol toType)
         {
-            var message = $"Variable '{name}' is already declared.";
+            var message = $"Cannot convert type '{fromType}' to '{toType}'. An explicit conversion exists (are you missing a cast?)";
             Report(location, message);
         }
 
-         public void ReportFunctionAlreadyDeclared(TextLocation location, string name)
+        public void ReportSymbolAlreadyDeclared(TextLocation location, string name)
         {
-            var message = $"Function '{name}' is already declared.";
+            var message = $"'{name}' is already declared.";
             Report(location, message);
         }
 
@@ -92,9 +110,15 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-         public void ReportUndefinedFunction(TextLocation location, string name)
+        public void ReportUndefinedFunction(TextLocation location, string name)
         {
             var message = $"Function '{name}' doesn't exist.";
+            Report(location, message);
+        }
+
+        public void ReportNotAFunction(TextLocation location, string name)
+        {
+            var message = $"'{name}' is not a function.";
             Report(location, message);
         }
 
@@ -116,37 +140,19 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-        public void ReportUndefinedType(TextLocation location, string name)
-        {
-            var message = $"Type '{name}' doesn't exist.";
-            Report(location, message);
-        }
-
-        public void ReportCannotConvertImplicitly(TextLocation location, TypeSymbol fromType, TypeSymbol toType)
-        {
-            var message = $"Cannot convert type '{fromType}' to '{toType}'. An explicit conversion exists (are you missing a cast?)";
-            Report(location, message);
-        }
-
-           public void ReportParameterAlreadyDeclared(TextLocation location, string parameterName)
-        {
-            var message = $"A parameter with the name '{parameterName}' already exists.";
-            Report(location, message);
-        }
-
-             public void XXX_ReportFunctionsAreUnsupported(TextLocation location)
-        {
-            var message = "Functions with return values are unsupported.";
-            Report(location, message);
-        }
-
         public void ReportInvalidBreakOrContinue(TextLocation location, string text)
         {
             var message = $"The keyword '{text}' can only be used inside of loops.";
             Report(location, message);
         }
 
-         public void ReportInvalidReturn(TextLocation location)
+        public void ReportAllPathsMustReturn(TextLocation location)
+        {
+            var message = "Not all code paths return a value.";
+            Report(location, message);
+        }
+
+        public void ReportInvalidReturn(TextLocation location)
         {
             var message = "The 'return' keyword can only be used inside of functions.";
             Report(location, message);
@@ -160,16 +166,32 @@ namespace Minsk.CodeAnalysis
 
         public void ReportMissingReturnExpression(TextLocation location, TypeSymbol returnType)
         {
-            var message = $"An expression of type '{returnType}' expected.";
+            var message = $"An expression of type '{returnType}' is expected.";
             Report(location, message);
         }
 
-        public void ReportAllPathsMustReturn(TextLocation location)
+        public void ReportInvalidExpressionStatement(TextLocation location)
         {
-            var message = "Not all code paths return a value.";
+            var message = $"Only assignment and call expressions can be used as a statement.";
             Report(location, message);
         }
 
+        public void ReportOnlyOneFileCanHaveGlobalStatements(TextLocation location)
+        {
+            var message = $"At most one file can have global statements.";
+            Report(location, message);
+        }
 
+        public void ReportMainMustHaveCorrectSignature(TextLocation location)
+        {
+            var message = $"main must not take arguments and not return anything.";
+            Report(location, message);
+        }
+
+        public void ReportCannotMixMainAndGlobalStatements(TextLocation location)
+        {
+            var message = $"Cannot declare main function when global statements are used.";
+            Report(location, message);
+        }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Minsk.CodeAnalysis;
-using Minsk.CodeAnalysis.Symbol;
+using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.IO;
 
@@ -45,7 +45,7 @@ namespace Minsk
                 return;
             
 
-            var compilation = new Compilation(syntaxTrees.ToArray());
+            var compilation =  Compilation.Create(syntaxTrees.ToArray());
             var result = compilation.Evaluate(new Dictionary<VariableSymbol, object>());
 
             if (!result.Diagnostics.Any())
