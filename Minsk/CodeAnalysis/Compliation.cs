@@ -8,6 +8,7 @@ using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Lowering;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
+using Minsk.CodeAnalysis.Emit;
 
 using ReflectionBindingFlags = System.Reflection.BindingFlags;
 
@@ -47,6 +48,7 @@ namespace Minsk.CodeAnalysis
             {
                 if (_globalScope == null)
                 {
+            
                     var globalScope = Binder.BindGlobalScope(IsScript, Previous?.GlobalScope, SyntaxTrees);
                     Interlocked.CompareExchange(ref _globalScope, globalScope, null);
                 }
@@ -138,6 +140,12 @@ namespace Minsk.CodeAnalysis
             if (!program.FunctionBodies.TryGetValue(symbol, out var body))
                 return;
             body.WriteTo(writer);
+        }
+
+        public ImmutableArray<Diagnostic> Emit(string moduleName, string[] references, string outputPath)
+        {
+            var program = GetProgram();
+            return Emitter.Emit(program, moduleName, references, outputPath);
         }
     }
 }

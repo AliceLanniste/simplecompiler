@@ -152,7 +152,7 @@ namespace Minsk
         protected override void EvaluateSubmission(string text)
         {
             var syntaxTree = SyntaxTree.Parse(text);
-
+            //第一次_previous为null,待会_previous为compilation
             var compilation = Compilation.CreateScript(_previous, syntaxTree);  
 
             if (_showTree)
@@ -207,6 +207,7 @@ namespace Minsk
             foreach (var file in files)
             {
                 var text = File.ReadAllText(file);
+                //不停调用 complication
                 EvaluateSubmission(text);
             }
 
