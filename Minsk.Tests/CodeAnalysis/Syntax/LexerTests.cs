@@ -74,6 +74,22 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
             Assert.Equal(tokens[2].Text, t2Text);
         }
 
+        [Theory]
+        [InlineData("foo")]
+        [InlineData("foo42")]
+        [InlineData("foo_42")]
+        [InlineData("_foo")]
+        public void Lexer_Lexes_Identifiers(string name)
+        {
+            var tokens = SyntaxTree.ParseTokens(name).ToArray();
+
+            Assert.Single(tokens);
+
+            var token = tokens[0];
+            Assert.Equal(SyntaxKind.IdentifierToken, token.Kind);
+            Assert.Equal(name, token.Text);
+        }
+
         public static IEnumerable<object[]> GetTokensData()
         {
             foreach (var t in GetTokens().Concat(GetSeparators()))
@@ -112,6 +128,7 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
             return fixedTokens.Concat(dynamicTokens);
         }
+
 
         private static IEnumerable<(SyntaxKind kind, string text)> GetSeparators()
         {
@@ -182,6 +199,12 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
                 return true;
 
             if (t1Kind == SyntaxKind.StringToken && t2Kind == SyntaxKind.StringToken)
+                return true;
+
+            if (t1Kind == SyntaxKind.IdentifierToken && t2Kind == SyntaxKind.NumberToken)
+                return true;
+
+            if (t1IsKeyword && t2Kind == SyntaxKind.NumberToken)
                 return true;
 
             return false;
