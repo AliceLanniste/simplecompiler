@@ -23,6 +23,8 @@ namespace Minsk.CodeAnalysis.Binding
         GotoStatement,
 
         ReturnStatement,
+
+        NopStatement,
         ConditionalGotoStatement,
     
     }

@@ -65,6 +65,9 @@ namespace Minsk.CodeAnalysis
 
                 switch (s.Kind)
                 {
+                    case BoundNodeKind.NopStatement:
+                        index++;
+                        break;
                     case BoundNodeKind.VariableDeclaration:
                         EvaluateVariableDeclaration((BoundVariableDeclaration)s);
                         index++;
