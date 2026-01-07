@@ -358,5 +358,12 @@ namespace Minsk.CodeAnalysis.Syntax
                     return null;
             }
         }
+
+        public static bool IsComment(this SyntaxKind kind)
+        {
+            return kind == SyntaxKind.SingleLineCommentToken ||
+                   kind == SyntaxKind.MultiLineCommentToken;
+        }
+
     }
 }

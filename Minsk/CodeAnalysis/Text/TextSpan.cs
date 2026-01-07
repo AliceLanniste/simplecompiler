@@ -17,6 +17,13 @@ namespace Minsk.CodeAnalysis.Text
         {
             return new TextSpan(start, end - start);
         }
+
+        public bool OverlapsWith(TextSpan span)
+        {
+            return Start < span.End &&
+                   End > span.Start;
+        }
+
     }
 }
 

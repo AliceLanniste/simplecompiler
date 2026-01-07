@@ -3,6 +3,8 @@ namespace Minsk.CodeAnalysis.Syntax
     public enum SyntaxKind
     {
         // Tokens
+        SingleLineCommentToken,
+        MultiLineCommentToken,
         BadToken,
         ColonToken,
         CommaToken,

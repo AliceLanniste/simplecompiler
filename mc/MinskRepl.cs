@@ -1,18 +1,20 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
+using Minsk.CodeAnalysis.Text;
 using Minsk.IO;
 
 namespace Minsk
 {
     internal sealed class MinskRepl : Repl
     {
+        private bool _loadingSubmission;
         private static readonly Compilation emptyCompilation = Compilation.CreateScript(null);
-        private static bool _loadingSubmission;
         private Compilation _previous;
         private bool _showTree;
         private bool _showProgram;
@@ -23,15 +25,51 @@ namespace Minsk
             LoadSubmissions();
         }
 
-        protected override void RenderLine(string line)
+        private sealed class RenderState
         {
-            var tokens = SyntaxTree.ParseTokens(line);
-            foreach (var token in tokens)
+            public RenderState(SourceText text, ImmutableArray<SyntaxToken> tokens)
             {
+                Text = text;
+                Tokens = tokens;
+            }
+
+            public SourceText Text { get; }
+            public ImmutableArray<SyntaxToken> Tokens { get; }
+        }
+
+        protected override object RenderLine(IReadOnlyList<string> lines, int lineIndex, object state)
+        {
+            RenderState renderState;
+
+            if (state == null)
+            {
+                var text = string.Join(Environment.NewLine, lines);
+                var sourceText = SourceText.From(text);
+                var tokens = SyntaxTree.ParseTokens(sourceText);
+                renderState = new RenderState(sourceText, tokens);
+            }
+            else
+            {
+                renderState = (RenderState) state;
+            }
+
+            var lineSpan = renderState.Text.Lines[lineIndex].Span;
+
+            foreach (var token in renderState.Tokens)
+            {
+                if (!lineSpan.OverlapsWith(token.Span))
+                    continue;
+
+                var tokenStart = Math.Max(token.Span.Start, lineSpan.Start);
+                var tokenEnd = Math.Min(token.Span.End, lineSpan.End);
+                var tokenSpan = TextSpan.FromBounds(tokenStart, tokenEnd);
+                var tokenText = renderState.Text.ToString(tokenSpan);
+
                 var isKeyword = token.Kind.ToString().EndsWith("Keyword");
                 var isIdentifier = token.Kind == SyntaxKind.IdentifierToken;
                 var isNumber = token.Kind == SyntaxKind.NumberToken;
                 var isString = token.Kind == SyntaxKind.StringToken;
+                var isComment = token.Kind.IsComment();
 
                 if (isKeyword)
                     Console.ForegroundColor = ConsoleColor.Blue;
@@ -41,13 +79,23 @@ namespace Minsk
                     Console.ForegroundColor = ConsoleColor.Cyan;
                 else if (isString)
                     Console.ForegroundColor = ConsoleColor.Magenta;
+                else if (isComment)
+                    Console.ForegroundColor = ConsoleColor.Green;
                 else
                     Console.ForegroundColor = ConsoleColor.DarkGray;
 
-                Console.Write(token.Text);
+                Console.Write(tokenText);
 
                 Console.ResetColor();
             }
+
+            return renderState;
+        }
+
+        [MetaCommand("exit", "Exits the REPL")]
+        private void EvaluateExit()
+        {
+            Environment.Exit(0);
         }
 
         [MetaCommand("cls", "Clears the screen")]
@@ -98,10 +146,8 @@ namespace Minsk
         [MetaCommand("ls", "Lists all symbols")]
         private void EvaluateLs()
         {
-            if (_previous == null)
-                return;
-
-            var symbols = _previous.GetSymbols().OrderBy(s => s.Kind).ThenBy(s => s.Name);
+            var compilation = _previous ?? emptyCompilation;
+            var symbols = compilation.GetSymbols().OrderBy(s => s.Kind).ThenBy(s => s.Name);
             foreach (var symbol in symbols)
             {
                 symbol.WriteTo(Console.Out);
@@ -112,10 +158,8 @@ namespace Minsk
         [MetaCommand("dump", "Shows bound tree of a given function")]
         private void EvaluateDump(string functionName)
         {
-            if (_previous == null)
-                return;
-
-            var symbol = _previous.GetSymbols().OfType<FunctionSymbol>().SingleOrDefault(f => f.Name == functionName);
+            var compilation = _previous ?? emptyCompilation;
+            var symbol = compilation.GetSymbols().OfType<FunctionSymbol>().SingleOrDefault(f => f.Name == functionName);
             if (symbol == null)
             {
                 Console.ForegroundColor = ConsoleColor.Red;
@@ -124,7 +168,7 @@ namespace Minsk
                 return;
             }
 
-            _previous.EmitTree(symbol, Console.Out);
+            compilation.EmitTree(symbol, Console.Out);
         }
 
         protected override bool IsCompleteSubmission(string text)
@@ -143,7 +187,8 @@ namespace Minsk
             var syntaxTree = SyntaxTree.Parse(text);
 
             // Use Members because we need to exclude the EndOfFileToken.
-            if (syntaxTree.Root.Members.Last().GetLastToken().IsMissing)
+            var lastMember = syntaxTree.Root.Members.LastOrDefault();
+            if (lastMember == null || lastMember.GetLastToken().IsMissing)
                 return false;
 
             return true;
@@ -152,8 +197,7 @@ namespace Minsk
         protected override void EvaluateSubmission(string text)
         {
             var syntaxTree = SyntaxTree.Parse(text);
-            //第一次_previous为null,待会_previous为compilation
-            var compilation = Compilation.CreateScript(_previous, syntaxTree);  
+            var compilation = Compilation.CreateScript(_previous, syntaxTree);
 
             if (_showTree)
                 syntaxTree.Root.WriteTo(Console.Out);
@@ -207,7 +251,6 @@ namespace Minsk
             foreach (var file in files)
             {
                 var text = File.ReadAllText(file);
-                //不停调用 complication
                 EvaluateSubmission(text);
             }
 
@@ -221,7 +264,7 @@ namespace Minsk
                 Directory.Delete(dir, recursive: true);
         }
 
-        private static void SaveSubmission(string text)
+        private void SaveSubmission(string text)
         {
             if (_loadingSubmission)
                 return;

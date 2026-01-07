@@ -73,8 +73,19 @@ namespace Minsk.CodeAnalysis.Syntax
                     break;
 
                 case '/':
-                    _kind = SyntaxKind.SlashToken;
+                   if (Lookahead == '/')
+                    {
+                       ReadSingleLineComment();
+
+                    } else if (Lookahead == '*')
+                    {
+                        ReadMultiLineComment();
+                    } else
+                    {
+                     _kind = SyntaxKind.SlashToken;
                     _position++;
+                    }
+                   
                     break;
                 case '(':
                     _kind = SyntaxKind.OpenParenthesisToken;
@@ -219,6 +230,61 @@ namespace Minsk.CodeAnalysis.Syntax
          
 
             return new SyntaxToken(_syntaxTree, _kind, _start, text, _value);
+        }
+
+       private void ReadSingleLineComment()
+        {
+            _position += 2;
+            var done = false;
+
+            while (!done)
+            {
+                switch (Current)
+                {
+                    case '\r':
+                    case '\n':
+                    case '\0':
+                        done = true;
+                        break;
+                    default:
+                        _position++;
+                        break;
+                }
+            }
+
+            _kind = SyntaxKind.SingleLineCommentToken;
+        }
+
+        private void ReadMultiLineComment()
+        {
+            _position += 2;
+            var done = false;
+
+            while (!done)
+            {
+                switch (Current)
+                {
+                    case '\0':
+                        var span = new TextSpan(_start, 2);
+                        var location = new TextLocation(_text, span);
+                        _diagnostics.ReportUnterminatedMultiLineComment(location);
+                        done = true;
+                        break;
+                    case '*':
+                       if(Lookahead == '/')
+                        {
+                            _position ++;
+                            done = true;
+                        }
+                        _position++;
+                        break;
+                    default:
+                        _position++;  
+                        break;     
+                }
+            }
+
+            _kind = SyntaxKind.MultiLineCommentToken;
         }
 
         private void ReadStringToken()
