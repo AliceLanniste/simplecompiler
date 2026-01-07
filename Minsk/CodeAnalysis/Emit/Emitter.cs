@@ -144,7 +144,7 @@ namespace Minsk.CodeAnalysis.Emit
 
             _objectEqualsReference = ResolveMethod("System.Object", "Equals", new [] { "System.Object", "System.Object" });
             _consoleReadLineReference = ResolveMethod("System.Console", "ReadLine", Array.Empty<string>());
-            _consoleWriteLineReference = ResolveMethod("System.Console", "WriteLine", new [] { "System.String" });
+            _consoleWriteLineReference = ResolveMethod("System.Console", "WriteLine", new [] { "System.Object" });
             _stringConcatReference = ResolveMethod("System.String", "Concat", new [] { "System.String", "System.String" });
             _convertToBooleanReference = ResolveMethod("System.Convert", "ToBoolean", new [] { "System.Object" });
             _convertToInt32Reference = ResolveMethod("System.Convert", "ToInt32", new [] { "System.Object" });
@@ -316,6 +316,7 @@ namespace Minsk.CodeAnalysis.Emit
                 EmitConstantExpression(ilProcessor, node);
                 return;
             }
+
             switch (node.Kind)
             {
                 case BoundNodeKind.VariableExpression:
@@ -341,7 +342,7 @@ namespace Minsk.CodeAnalysis.Emit
             }
         }
 
-        private void EmitLiteralExpression(ILProcessor ilProcessor, BoundLiteralExpression node)
+        private void EmitConstantExpression(ILProcessor ilProcessor, BoundExpression node)
         {
             if (node.Type == TypeSymbol.Bool)
             {
