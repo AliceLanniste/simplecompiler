@@ -7,6 +7,6 @@ namespace Minsk.CodeAnalysis.Binding
     {
          public abstract TypeSymbol Type { get; }
 
-        public virtual BoundConstant ConstantValue { get; }
+        public virtual BoundConstant ConstantValue => null;
     }
 }
