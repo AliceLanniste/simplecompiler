@@ -47,7 +47,7 @@ namespace Minsk.CodeAnalysis.Syntax
         {
 
             _start = _position;
-            _kind = SyntaxKind.BadToken;
+            _kind = SyntaxKind.BadTokenTrivia;
             _value = null; 
 
             switch (Current)
@@ -252,7 +252,7 @@ namespace Minsk.CodeAnalysis.Syntax
                 }
             }
 
-            _kind = SyntaxKind.SingleLineCommentToken;
+            _kind = SyntaxKind.SingleLineCommentTrivia;
         }
 
         private void ReadMultiLineComment()
@@ -284,7 +284,7 @@ namespace Minsk.CodeAnalysis.Syntax
                 }
             }
 
-            _kind = SyntaxKind.MultiLineCommentToken;
+            _kind = SyntaxKind.MultiLineCommentTrivia;
         }
 
         private void ReadStringToken()
@@ -350,7 +350,7 @@ namespace Minsk.CodeAnalysis.Syntax
                 _position++;
 
             var length = _position - _start;
-            _kind = SyntaxKind.WhitespaceToken;
+            _kind = SyntaxKind.WhitespaceTrivia;
         }
 
         private void ReadIdentifierOrKeyword()
