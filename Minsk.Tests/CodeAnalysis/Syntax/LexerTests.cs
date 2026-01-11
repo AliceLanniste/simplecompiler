@@ -7,38 +7,61 @@ using Xunit;
 
 namespace Minsk.Tests.CodeAnalysis.Syntax
 {
-
     public class LexerTests
     {
         [Fact]
         public void Lexer_Lexes_UnterminatedString()
         {
             var text = "\"text";
-            var tokens = SyntaxTree.ParseTokens(text,out var diagnostics);
+            var tokens = SyntaxTree.ParseTokens(text, out var diagnostics);
 
             var token = Assert.Single(tokens);
             Assert.Equal(SyntaxKind.StringToken, token.Kind);
-            Assert.Equal(text, token.Text);   
+            Assert.Equal(text, token.Text);
 
             var diagnostic = Assert.Single(diagnostics);
             Assert.Equal(new TextSpan(0, 1), diagnostic.Location.Span);
             Assert.Equal("Unterminated string literal.", diagnostic.Message);
         }
-      
-      
-       [Fact]
-        public void Lexer_Lexes_Token()
-        {   var tokenKinds = Enum.GetValues(typeof(SyntaxKind))
+
+        [Fact]
+        public void Lexer_Covers_AllTokens()
+        {
+            var tokenKinds = Enum.GetValues(typeof(SyntaxKind))
                                  .Cast<SyntaxKind>()
                                  .Where(k => k.IsToken());
-          
+
             var testedTokenKinds = GetTokens().Concat(GetSeparators()).Select(t => t.kind);
 
             var untestedTokenKinds = new SortedSet<SyntaxKind>(tokenKinds);
-            untestedTokenKinds.Remove(SyntaxKind.BadTokenTrivia);
+            untestedTokenKinds.Remove(SyntaxKind.BadToken);
             untestedTokenKinds.Remove(SyntaxKind.EndOfFileToken);
             untestedTokenKinds.ExceptWith(testedTokenKinds);
+
             Assert.Empty(untestedTokenKinds);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetTokensData))]
+        public void Lexer_Lexes_Token(SyntaxKind kind, string text)
+        {
+            var tokens = SyntaxTree.ParseTokens(text);
+
+            var token = Assert.Single(tokens);
+            Assert.Equal(kind, token.Kind);
+            Assert.Equal(text, token.Text);
+        }
+
+        [Theory]
+        [MemberData(nameof(GetSeparatorsData))]
+        public void Lexer_Lexes_Separator(SyntaxKind kind, string text)
+        {
+            var tokens = SyntaxTree.ParseTokens(text, includeEndOfFile: true);
+
+            var token = Assert.Single(tokens);
+            var trivia = Assert.Single(token.LeadingTrivia);
+            Assert.Equal(kind, trivia.Kind);
+            Assert.Equal(text, trivia.Text);
         }
 
         [Theory]
@@ -47,12 +70,13 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
                                            SyntaxKind t2Kind, string t2Text)
         {
             var text = t1Text + t2Text;
-        var tokens = SyntaxTree.ParseTokens(text).ToArray();
+            var tokens = SyntaxTree.ParseTokens(text).ToArray();
+
             Assert.Equal(2, tokens.Length);
-            Assert.Equal(tokens[0].Kind, t1Kind);
-            Assert.Equal(tokens[0].Text, t1Text);
-            Assert.Equal(tokens[1].Kind, t2Kind);
-            Assert.Equal(tokens[1].Text, t2Text);
+            Assert.Equal(t1Kind, tokens[0].Kind);
+            Assert.Equal(t1Text, tokens[0].Text);
+            Assert.Equal(t2Kind, tokens[1].Kind);
+            Assert.Equal(t2Text, tokens[1].Text);
         }
 
         [Theory]
@@ -64,13 +88,16 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
             var text = t1Text + separatorText + t2Text;
             var tokens = SyntaxTree.ParseTokens(text).ToArray();
 
-            Assert.Equal(3, tokens.Length);
-            Assert.Equal(tokens[0].Kind, t1Kind);
-            Assert.Equal(tokens[0].Text, t1Text);
-            Assert.Equal(tokens[1].Kind, separatorKind);
-            Assert.Equal(tokens[1].Text, separatorText);
-            Assert.Equal(tokens[2].Kind, t2Kind);
-            Assert.Equal(tokens[2].Text, t2Text);
+            Assert.Equal(2, tokens.Length);
+            Assert.Equal(t1Kind, tokens[0].Kind);
+            Assert.Equal(t1Text, tokens[0].Text);
+
+            var separator = Assert.Single(tokens[0].TrailingTrivia);
+            Assert.Equal(separatorKind, separator.Kind);
+            Assert.Equal(separatorText, separator.Text);
+
+            Assert.Equal(t2Kind, tokens[1].Kind);
+            Assert.Equal(t2Text, tokens[1].Text);
         }
 
         [Theory]
@@ -91,7 +118,13 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
         public static IEnumerable<object[]> GetTokensData()
         {
-            foreach (var t in GetTokens().Concat(GetSeparators()))
+            foreach (var t in GetTokens())
+                yield return new object[] { t.kind, t.text };
+        }
+
+        public static IEnumerable<object[]> GetSeparatorsData()
+        {
+            foreach (var t in GetSeparators())
                 yield return new object[] { t.kind, t.text };
         }
 
@@ -109,7 +142,7 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
         private static IEnumerable<(SyntaxKind kind, string text)> GetTokens()
         {
-           var fixedTokens = Enum.GetValues(typeof(SyntaxKind))
+            var fixedTokens = Enum.GetValues(typeof(SyntaxKind))
                                   .Cast<SyntaxKind>()
                                   .Select(k => (kind: k, text: SyntaxFacts.GetText(k)))
                                   .Where(t => t.text != null);
@@ -128,24 +161,23 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
             return fixedTokens.Concat(dynamicTokens);
         }
 
-
         private static IEnumerable<(SyntaxKind kind, string text)> GetSeparators()
         {
             return new[]
             {
                 (SyntaxKind.WhitespaceTrivia, " "),
                 (SyntaxKind.WhitespaceTrivia, "  "),
-                (SyntaxKind.WhitespaceTrivia, "\r"),
-                (SyntaxKind.WhitespaceTrivia, "\n"),
-                (SyntaxKind.WhitespaceTrivia, "\r\n"),
-                (SyntaxKind.MultiLineCommentTrivia,"/**/")
+                (SyntaxKind.LineBreakTrivia, "\r"),
+                (SyntaxKind.LineBreakTrivia, "\n"),
+                (SyntaxKind.LineBreakTrivia, "\r\n"),
+                (SyntaxKind.MultiLineCommentTrivia, "/**/"),
             };
         }
 
         private static bool RequiresSeparator(SyntaxKind t1Kind, SyntaxKind t2Kind)
         {
-             var t1IsKeyword = t1Kind.ToString().EndsWith("Keyword");
-            var t2IsKeyword = t2Kind.ToString().EndsWith("Keyword");
+            var t1IsKeyword = t1Kind.IsKeyword();
+            var t2IsKeyword = t2Kind.IsKeyword();
 
             if (t1Kind == SyntaxKind.IdentifierToken && t2Kind == SyntaxKind.IdentifierToken)
                 return true;
@@ -159,7 +191,16 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
             if (t1Kind == SyntaxKind.IdentifierToken && t2IsKeyword)
                 return true;
 
+            if (t1Kind == SyntaxKind.IdentifierToken && t2Kind == SyntaxKind.NumberToken)
+                return true;
+
+            if (t1IsKeyword && t2Kind == SyntaxKind.NumberToken)
+                return true;
+
             if (t1Kind == SyntaxKind.NumberToken && t2Kind == SyntaxKind.NumberToken)
+                return true;
+
+            if (t1Kind == SyntaxKind.StringToken && t2Kind == SyntaxKind.StringToken)
                 return true;
 
             if (t1Kind == SyntaxKind.BangToken && t2Kind == SyntaxKind.EqualsToken)
@@ -191,21 +232,13 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
 
             if (t1Kind == SyntaxKind.AmpersandToken && t2Kind == SyntaxKind.AmpersandAmpersandToken)
                 return true;
-            
+
             if (t1Kind == SyntaxKind.PipeToken && t2Kind == SyntaxKind.PipeToken)
                 return true;
 
             if (t1Kind == SyntaxKind.PipeToken && t2Kind == SyntaxKind.PipePipeToken)
                 return true;
 
-            if (t1Kind == SyntaxKind.StringToken && t2Kind == SyntaxKind.StringToken)
-                return true;
-
-            if (t1Kind == SyntaxKind.IdentifierToken && t2Kind == SyntaxKind.NumberToken)
-                return true;
-
-            if (t1IsKeyword && t2Kind == SyntaxKind.NumberToken)
-                return true;
             if (t1Kind == SyntaxKind.SlashToken && t2Kind == SyntaxKind.SlashToken)
                 return true;
 
@@ -244,13 +277,13 @@ namespace Minsk.Tests.CodeAnalysis.Syntax
                     if (RequiresSeparator(t1.kind, t2.kind))
                     {
                         foreach (var s in GetSeparators())
-                           if (!RequiresSeparator(t1.kind, s.kind) && !RequiresSeparator(s.kind, t2.kind))
-
+                        {
+                            if (!RequiresSeparator(t1.kind, s.kind) && !RequiresSeparator(s.kind, t2.kind))
                                 yield return (t1.kind, t1.text, s.kind, s.text, t2.kind, t2.text);
+                        }
                     }
                 }
             }
         }
     }
 }
-
