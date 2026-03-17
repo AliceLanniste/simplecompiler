@@ -80,3 +80,4 @@ namespace Minsk.CodeAnalysis.Authoring
                 return Classification.Text;
         }
     }
+}

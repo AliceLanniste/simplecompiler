@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis.Text;
@@ -16,9 +17,9 @@ namespace Minsk.CodeAnalysis
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        public void AddRange(DiagnosticBag diagnostics)
+        public void AddRange(IEnumerable<Diagnostic> diagnostics)
         {
-            _diagnostics.AddRange(diagnostics._diagnostics);
+            _diagnostics.AddRange(diagnostics);
         }
 
         private void Report(TextLocation location, string message)
@@ -42,6 +43,12 @@ namespace Minsk.CodeAnalysis
         public void ReportUnterminatedString(TextLocation location)
         {
             var message = "Unterminated string literal.";
+            Report(location, message);
+        }
+
+        public void ReportUnterminatedMultiLineComment(TextLocation location)
+        {
+            var message = "Unterminated multi-line comment.";
             Report(location, message);
         }
 
@@ -129,12 +136,6 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-        public void ReportWrongArgumentType(TextLocation location, string name, TypeSymbol expectedType, TypeSymbol actualType)
-        {
-            var message = $"Parameter '{name}' requires a value of type '{expectedType}' but was given a value of type '{actualType}'.";
-            Report(location, message);
-        }
-
         public void ReportExpressionMustHaveValue(TextLocation location)
         {
             var message = "Expression must have a value.";
@@ -153,15 +154,15 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-        public void ReportInvalidReturn(TextLocation location)
-        {
-            var message = "The 'return' keyword can only be used inside of functions.";
-            Report(location, message);
-        }
-
         public void ReportInvalidReturnExpression(TextLocation location, string functionName)
         {
             var message = $"Since the function '{functionName}' does not return a value the 'return' keyword cannot be followed by an expression.";
+            Report(location, message);
+        }
+
+        public void ReportInvalidReturnWithValueInGlobalStatements(TextLocation location)
+        {
+            var message = "The 'return' keyword cannot be followed by an expression in global statements.";
             Report(location, message);
         }
 
@@ -195,13 +196,13 @@ namespace Minsk.CodeAnalysis
             Report(location, message);
         }
 
-          public void ReportInvalidReference(string path)
+        public void ReportInvalidReference(string path)
         {
             var message = $"The reference is not a valid .NET assembly: '{path}'";
             Report(default, message);
         }
 
-        public void ReportRequiredTypeNotFound(string minskName, string metadataName)
+        public void ReportRequiredTypeNotFound(string? minskName, string metadataName)
         {
             var message = minskName == null
                 ? $"The required type '{metadataName}' cannot be resolved among the given references."
@@ -209,7 +210,7 @@ namespace Minsk.CodeAnalysis
             Report(default, message);
         }
 
-        public void ReportRequiredTypeAmbiguous(string minskName, string metadataName, TypeDefinition[] foundTypes)
+        public void ReportRequiredTypeAmbiguous(string? minskName, string metadataName, TypeDefinition[] foundTypes)
         {
             var assemblyNames = foundTypes.Select(t => t.Module.Assembly.Name.Name);
             var assemblyNameList = string.Join(", ", assemblyNames);
@@ -225,12 +226,5 @@ namespace Minsk.CodeAnalysis
             var message = $"The required method '{typeName}.{methodName}({parameterTypeNameList})' cannot be resolved among the given references.";
             Report(default, message);
         }
-
-         public void ReportUnterminatedMultiLineComment(TextLocation location)
-        {
-            var message = "Unterminated multi-line comment.";
-            Report(location, message);
-        }
-
     }
 }

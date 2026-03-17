@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 
@@ -61,7 +62,7 @@ namespace Minsk.CodeAnalysis.Binding
 
         public sealed class BasicBlockBranch
         {
-            public BasicBlockBranch(BasicBlock from, BasicBlock to, BoundExpression condition)
+            public BasicBlockBranch(BasicBlock from, BasicBlock to, BoundExpression? condition)
             {
                 From = from;
                 To = to;
@@ -70,7 +71,7 @@ namespace Minsk.CodeAnalysis.Binding
 
             public BasicBlock From { get; }
             public BasicBlock To { get; }
-            public BoundExpression Condition { get; }
+            public BoundExpression? Condition { get; }
 
             public override string ToString()
             {
@@ -216,7 +217,7 @@ namespace Minsk.CodeAnalysis.Binding
                 return new ControlFlowGraph(_start, _end, blocks, _branches);
             }
 
-            private void Connect(BasicBlock from, BasicBlock to, BoundExpression condition = null)
+            private void Connect(BasicBlock from, BasicBlock to, BoundExpression? condition = null)
             {
                 if (condition is BoundLiteralExpression l)
                 {
@@ -259,6 +260,7 @@ namespace Minsk.CodeAnalysis.Binding
                 }
 
                 var op = BoundUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool);
+                Debug.Assert(op != null);
                 return new BoundUnaryExpression(op, condition);
             }
         }
@@ -317,7 +319,6 @@ namespace Minsk.CodeAnalysis.Binding
                 if (lastStatement == null || lastStatement.Kind != BoundNodeKind.ReturnStatement)
                     return false;
             }
-
             return true;
         }
     }

@@ -73,7 +73,6 @@ namespace Minsk.CodeAnalysis.Syntax
 
             void ParseTokens(SyntaxTree st, out CompilationUnitSyntax root, out ImmutableArray<Diagnostic> d)
             {
-                root = null;
 
                 var l = new Lexer(st);
                 while (true)
@@ -86,7 +85,11 @@ namespace Minsk.CodeAnalysis.Syntax
                         tokens.Add(token);
 
                     if (token.Kind == SyntaxKind.EndOfFileToken)
+                    {
+                        root = new CompilationUnitSyntax(st, ImmutableArray<MemberSyntax>.Empty, token);
                         break;
+                    }
+                      
                 }
 
                 d = l.Diagnostics.ToImmutableArray();

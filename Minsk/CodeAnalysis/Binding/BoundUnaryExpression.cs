@@ -18,7 +18,7 @@ namespace Minsk.CodeAnalysis.Binding
         public BoundUnaryOperator Op { get; }
         public BoundExpression Operand { get; }
 
-        public override BoundConstant ConstantValue { get; }
+        public override BoundConstant? ConstantValue { get; }
         
     }
 }

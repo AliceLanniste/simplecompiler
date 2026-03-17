@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Minsk.CodeAnalysis.Binding;
-using Minsk.CodeAnalysis.Lowering;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis.Emit;
@@ -16,9 +15,9 @@ namespace Minsk.CodeAnalysis
 {
     public sealed class Compilation
     {
-        private BoundGlobalScope _globalScope;
+        private BoundGlobalScope? _globalScope;
 
-        private Compilation(bool isScript, Compilation previous, params SyntaxTree[] syntaxTrees)
+        private Compilation(bool isScript, Compilation? previous, params SyntaxTree[] syntaxTrees)
         {
             IsScript = isScript;
             Previous = previous;
@@ -30,18 +29,18 @@ namespace Minsk.CodeAnalysis
             return new Compilation(isScript: false, previous: null, syntaxTrees);
         }
 
-        public static Compilation CreateScript(Compilation previous, params SyntaxTree[] syntaxTrees)
+        public static Compilation CreateScript(Compilation? previous, params SyntaxTree[] syntaxTrees)
         {
             return new Compilation(isScript: true, previous, syntaxTrees);
         }
 
         public bool IsScript { get; }
-        public Compilation Previous { get; }
+        public Compilation? Previous { get; }
         public ImmutableArray<SyntaxTree> SyntaxTrees { get; }
         public ImmutableArray<FunctionSymbol> Functions => GlobalScope.Functions;
         public ImmutableArray<VariableSymbol> Variables => GlobalScope.Variables;
 
-        public FunctionSymbol MainFunction => GlobalScope.MainFunction;
+        public FunctionSymbol? MainFunction => GlobalScope.MainFunction;
         internal BoundGlobalScope GlobalScope
         {
             get

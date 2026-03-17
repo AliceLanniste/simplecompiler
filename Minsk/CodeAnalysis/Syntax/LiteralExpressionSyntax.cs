@@ -5,7 +5,7 @@ namespace Minsk.CodeAnalysis.Syntax
     public sealed class LiteralExpressionSyntax : ExpressionSyntax
     {
         public LiteralExpressionSyntax(SyntaxTree syntaxTree,SyntaxToken literalToken)
-            : this(syntaxTree, literalToken, literalToken.Value)
+            : this(syntaxTree, literalToken, literalToken.Value!)
         {
         }
 

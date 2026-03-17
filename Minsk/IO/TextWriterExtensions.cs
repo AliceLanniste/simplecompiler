@@ -1,6 +1,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.IO;
+using System.Diagnostics;
 using Minsk.CodeAnalysis.Syntax;
 using Minsk.CodeAnalysis;
 using Minsk.CodeAnalysis.Text;
@@ -34,6 +35,9 @@ namespace Minsk.IO
 
         public static void WriteKeyword(this TextWriter writer, SyntaxKind kind)
         {
+            var text = SyntaxFacts.GetText(kind);
+            Debug.Assert(kind.IsKeyword() && text != null);
+
             writer.WriteKeyword(SyntaxFacts.GetText(kind));
         }
 
@@ -72,6 +76,8 @@ namespace Minsk.IO
 
         public static void WritePunctuation(this TextWriter writer, SyntaxKind kind)
         {
+            var text = SyntaxFacts.GetText(kind);
+            Debug.Assert(text != null);
             writer.WritePunctuation(SyntaxFacts.GetText(kind));
         }
 

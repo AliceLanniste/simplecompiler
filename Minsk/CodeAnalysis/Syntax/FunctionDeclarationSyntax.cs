@@ -4,7 +4,7 @@ namespace  Minsk.CodeAnalysis.Syntax
     {
         public FunctionDeclarationSyntax(
             SyntaxTree syntaxTree,
-            SyntaxToken functionKeyword, SyntaxToken identifier, SyntaxToken openParenthesisToken, SeparatedSyntaxList<ParameterSyntax> parameters, SyntaxToken closeParenthesisToken, TypeClauseSyntax type, BlockStatementSyntax body)
+            SyntaxToken functionKeyword, SyntaxToken identifier, SyntaxToken openParenthesisToken, SeparatedSyntaxList<ParameterSyntax> parameters, SyntaxToken closeParenthesisToken, TypeClauseSyntax? type, BlockStatementSyntax body)
          :base(syntaxTree)
         {
             FunctionKeyword = functionKeyword;
@@ -22,7 +22,7 @@ namespace  Minsk.CodeAnalysis.Syntax
         public SyntaxToken OpenParenthesisToken {get;}
         public SeparatedSyntaxList<ParameterSyntax> Parameters {get;}
         public SyntaxToken CloseParenthesisToken {get;}
-        public TypeClauseSyntax Type {get;}
+        public TypeClauseSyntax? Type {get;}
         public BlockStatementSyntax Body {get;}
         }
 }

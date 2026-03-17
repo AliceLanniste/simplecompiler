@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Diagnostics;
 using Minsk.CodeAnalysis.Binding;
 using Minsk.CodeAnalysis.Symbols;
 using Minsk.CodeAnalysis.Syntax;
@@ -33,7 +34,7 @@ namespace Minsk.CodeAnalysis.Emit
         private readonly List<(int InstructionIndex, BoundLabel Target)> _fixups = new List<(int InstructionIndex, BoundLabel Target)>();
 
         private TypeDefinition _typeDefinition;
-        private FieldDefinition _randomFieldDefinition;
+        private FieldDefinition? _randomFieldDefinition;
 
         private Emitter(string moduleName, string[] references)
         {
@@ -71,7 +72,7 @@ namespace Minsk.CodeAnalysis.Emit
                 _knownTypes.Add(typeSymbol, typeReference);
             }
 
-            TypeReference ResolveType(string minskName, string metadataName)
+            TypeReference ResolveType(string? minskName, string metadataName)
             {
                 var foundTypes = assemblies.SelectMany(a => a.Modules)
                                            .SelectMany(m => m.Types)
@@ -91,7 +92,7 @@ namespace Minsk.CodeAnalysis.Emit
                     _diagnostics.ReportRequiredTypeAmbiguous(minskName, metadataName, foundTypes);
                 }
 
-                return null;
+                return null!;
             }
 
             MethodReference ResolveMethod(string typeName, string methodName, string[] parameterTypeNames)
@@ -128,7 +129,7 @@ namespace Minsk.CodeAnalysis.Emit
                     }
 
                     _diagnostics.ReportRequiredMethodNotFound(typeName, methodName, parameterTypeNames);
-                    return null;
+                    return null!;
                 }
                 else if (foundTypes.Length == 0)
                 {
@@ -139,7 +140,7 @@ namespace Minsk.CodeAnalysis.Emit
                     _diagnostics.ReportRequiredTypeAmbiguous(null, typeName, foundTypes);
                 }
 
-                return null;
+                return null!;
             }
 
             _objectEqualsReference = ResolveMethod("System.Object", "Equals", new [] { "System.Object", "System.Object" });
@@ -152,6 +153,18 @@ namespace Minsk.CodeAnalysis.Emit
             _randomReference = ResolveType(null, "System.Random");
             _randomCtorReference = ResolveMethod("System.Random", ".ctor", Array.Empty<string>());
             _randomNextReference = ResolveMethod("System.Random", "Next", new [] { "System.Int32" });
+
+            
+            var objectType = _knownTypes[TypeSymbol.Any];
+            if (objectType != null)
+            {
+                _typeDefinition = new TypeDefinition("", "Program", TypeAttributes.Abstract | TypeAttributes.Sealed, objectType);
+                _assemblyDefinition.MainModule.Types.Add(_typeDefinition);
+            }
+            else
+            {
+                _typeDefinition = null!;
+            }
         }
 
         public static ImmutableArray<Diagnostic> Emit(BoundProgram program, string moduleName, string[] references, string outputPath)
@@ -168,10 +181,6 @@ namespace Minsk.CodeAnalysis.Emit
             if (_diagnostics.Any())
                 return _diagnostics.ToImmutableArray();
 
-            var objectType = _knownTypes[TypeSymbol.Any];
-            _typeDefinition = new TypeDefinition("", "Program", TypeAttributes.Abstract | TypeAttributes.Sealed, objectType);
-            _assemblyDefinition.MainModule.Types.Add(_typeDefinition);
-
             foreach (var functionWithBody in program.FunctionBodies)
                 EmitFunctionDeclaration(functionWithBody.Key);
 
@@ -181,7 +190,20 @@ namespace Minsk.CodeAnalysis.Emit
             if (program.MainFunction != null)
                 _assemblyDefinition.EntryPoint = _methods[program.MainFunction];
 
+            var symbolsPath = Path.ChangeExtension(outputPath, ".pdb");
+
+            using (var outputStream = File.Create(outputPath))
+            using (var symbolsStream = File.Create(symbolsPath))
+            {
+                var writeParameters = new WriterParameters();
+                writeParameters.WriteSymbols = true;
+                writeParameters.symbolsStream = symbolsStream;
+                writeParameters.SymbolWriteProvider = new PortablePdbWriterProvider();
+
             _assemblyDefinition.Write(outputPath);
+
+            }
+
 
             return _diagnostics.ToImmutableArray();
         }
@@ -344,6 +366,7 @@ namespace Minsk.CodeAnalysis.Emit
 
         private void EmitConstantExpression(ILProcessor ilProcessor, BoundExpression node)
         {
+            Debug.Assert(node.ConstantValue != null);
             if (node.Type == TypeSymbol.Bool)
             {
                 var value = (bool)node.ConstantValue.Value;
